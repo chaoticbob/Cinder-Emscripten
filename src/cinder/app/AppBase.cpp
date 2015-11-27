@@ -64,7 +64,10 @@
  	#if defined( __ANDROID__ )
  		#include "cinder/android/libc_helper.h"
  	#endif
-	#include "asio/asio.hpp"
+
+	#if ! defined( CINDER_EMSCRIPTEN )
+		#include "asio/asio.hpp"
+	#endif
 #endif
 
 #include "cinder/app/AppBase.h"
@@ -149,8 +152,10 @@ AppBase::AppBase()
 	mHighDensityDisplayEnabled = sSettingsFromMain->isHighDensityDisplayEnabled();
 	mCommandLineArgs = sSettingsFromMain->getCommandLineArgs();
 
+#if ! defined( CINDER_EMSCRIPTEN )
 	mIo = shared_ptr<asio::io_service>( new asio::io_service() );
 	mIoWork = shared_ptr<asio::io_service::work>( new asio::io_service::work( *mIo ) );
+#endif
 
 	// due to an issue with boost::filesystem's static initialization on Windows, 
 	// it's necessary to create a fs::path here in case of secondary threads doing the same thing simultaneously
@@ -161,7 +166,9 @@ AppBase::AppBase()
 
 AppBase::~AppBase()
 {
+#if ! defined( CINDER_EMSCRIPTEN )
 	mIo->stop();
+#endif
 }
 
 // These are called by application instantiation main functions
@@ -213,8 +220,10 @@ void AppBase::privateUpdate__()
 {
 	mFrameCount++;
 
+#if ! defined( CINDER_EMSCRIPTEN )
 	// service asio::io_service
 	mIo->poll();
+#endif
 
 	if( getNumWindows() > 0 ) {
 		WindowRef mainWin = getWindowIndex( 0 );
@@ -297,7 +306,9 @@ bool AppBase::isMainThread()
 
 void AppBase::dispatchAsync( const std::function<void()> &fn )
 {
+#if ! defined( CINDER_EMSCRIPTEN )
 	io_service().post( fn );
+#endif
 }
 
 Surface	AppBase::copyWindowSurface()

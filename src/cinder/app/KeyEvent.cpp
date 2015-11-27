@@ -809,8 +809,16 @@ int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
 	else
 		return sKeyTable[nativeKeyCode];
 }
+
 #endif
 
-#endif // defined( CINDER_LINUX )
+#elif defined( CINDER_EMSCRIPTEN )
+
+int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
+{
+	return 0;
+}
+
+#endif // defined( CINDER_EMSCRIPTEN )
 	
 } } // namespace cinder::app

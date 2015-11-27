@@ -47,6 +47,7 @@
 #include "cinder/Unicode.h"
 #include <cstring>
 #include <string>
+#include <cstdlib>
 
 #include "utf8cpp/checked.h"
 extern "C" {

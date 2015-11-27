@@ -61,4 +61,11 @@
         typedef AppLinux App;
     } } // namespace cinder::app
 	#define CINDER_APP( APP, RENDERER, ... )	CINDER_APP_LINUX( APP, RENDERER, ##__VA_ARGS__ )
+#elif defined( CINDER_EMSCRIPTEN )
+    #include "cinder/app/emscripten/AppEmscripten.h"
+    namespace cinder { namespace app {
+        typedef AppEmscripten App;
+    } } // namespace cinder::app
+	#define CINDER_APP( APP, RENDERER, ... )	CINDER_APP_EMSCRIPTEN( APP, RENDERER, ##__VA_ARGS__ )
+
 #endif

@@ -1,8 +1,7 @@
 /*
- Copyright (c) 2010, The Barbarian Group
- All rights reserved.
+ Copyright (c) 2015, The Cinder Project, All rights reserved.
 
- Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+ This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that
  the following conditions are met:
@@ -22,46 +21,38 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cinder/Rand.h"
-#if defined( CINDER_COCOA )
-#	include <mach/mach.h>
-#	include <mach/mach_time.h>
-#elif (defined( CINDER_MSW ) || defined( CINDER_WINRT ))
-#	include <windows.h>
-#elif defined( CINDER_ANDROID ) || defined( CINDER_EMSCRIPTEN )
-#	include <sys/time.h>
-#	include <time.h>
-#endif
+#pragma once
 
-namespace cinder {
-	
-std::mt19937 Rand::sBase( 310u );
-std::uniform_real_distribution<float> Rand::sFloatGen;
+#include "cinder/app/AppBase.h"
 
-void Rand::randomize()
-{
-#if defined( CINDER_COCOA )
-	sBase = std::mt19937( (uint32_t)( mach_absolute_time() & 0xFFFFFFFF ) );
-#elif defined( CINDER_WINRT)
-	sBase = std::mt19937( static_cast<unsigned long>(::GetTickCount64()) );
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
-	struct timespec now;
-	::clock_gettime(CLOCK_MONOTONIC, &now);
-	long long tickCount = (now.tv_sec * 1000000000LL) + now.tv_nsec;
-	sBase = std::mt19937( tickCount );
-#else
-	sBase = std::mt19937( ::GetTickCount() );
-#endif
-}
+typedef struct GLFWwindow GLFWwindow;
 
-void Rand::randSeed( uint32_t seed )
-{
-	sBase = std::mt19937( seed );
-}
+namespace cinder { namespace gl {
 
-void Rand::seed( uint32_t seedValue )
-{
-	mBase = std::mt19937( seedValue );
-}
+class Context;
+using ContextRef = std::shared_ptr<Context>;
 
-} // ci
+}} // namespace cinder::gl
+
+namespace cinder { namespace app {
+
+class RendererImplGlEmscripten {
+ public:
+
+	RendererImplGlEmscripten( class RendererGl *aRenderer );
+	virtual ~RendererImplGlEmscripten();
+
+	virtual bool		initialize( void *window, RendererRef sharedRenderer );
+	virtual void		kill();
+	virtual void		defaultResize() const;
+	virtual void		swapBuffers() const;
+	virtual void		makeCurrentContext( bool force = false );	
+
+ private:
+	class RendererGl	*mRenderer = nullptr;
+	gl::ContextRef 		mCinderContext;
+
+	GLFWwindow			*mContext = nullptr;
+};
+
+}} // namespace cinder::app

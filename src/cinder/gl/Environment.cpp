@@ -179,6 +179,9 @@ ContextRef Environment::createSharedContext( const Context *sharedContext )
 	auto sharedContextPlatformData = dynamic_pointer_cast<PlatformDataLinux>( sharedContext->getPlatformData() );
   	shared_ptr<Context::PlatformData> platformData( new PlatformDataLinux( sharedContextPlatformData->mContext ) );
   #endif
+#elif defined( CINDER_EMSCRIPTEN )  	
+	auto sharedContextPlatformData = dynamic_pointer_cast<PlatformDataEmscripten>( sharedContext->getPlatformData() );
+  	shared_ptr<Context::PlatformData> platformData( new PlatformDataEmscripten( sharedContextPlatformData->mContext ) );
 #endif
 
 	ContextRef result( new Context( platformData ) );

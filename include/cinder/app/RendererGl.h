@@ -187,6 +187,8 @@ class RendererGl : public Renderer {
 	virtual void	setup( ANativeWindow *nativeWindow, RendererRef sharedRenderer ) override;
 #elif defined( CINDER_LINUX )
 	virtual void	setup( void* nativeWindow, RendererRef sharedRenderer ) override;
+#elif defined( CINDER_EMSCRIPTEN )
+	virtual void	setup( void* nativeWindow, RendererRef sharedRenderer ) override;
 #endif
 
 	const Options&	getOptions() const { return mOptions; }
@@ -232,6 +234,10 @@ protected:
 	class RendererGlLinux  	*mImpl;
 	RendererGlLinux         *getImpl() { return mImpl; }
 	friend class WindowImplLinux;
+#elif defined( CINDER_EMSCRIPTEN )	
+	class RendererImplGlEmscripten	*mImpl;
+	RendererImplGlEmscripten	*getImpl() { return mImpl; }
+	friend class WindowImplEmscripten;
 #endif
 
 	std::function<void( Renderer* )> mStartDrawFn;

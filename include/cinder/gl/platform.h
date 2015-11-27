@@ -106,6 +106,13 @@
  	#else
  		#include "glload/gl_core.h"
  	#endif
+#elif defined( CINDER_EMSCRIPTEN )
+ 	#define GL_GLEXT_PROTOTYPES
+ 	#include "EGL/egl.h" 
+	#include "cinder/linux/GLES2/gl2.h"
+	#include "cinder/linux/GLES2/gl2ext.h"
+ 	#define CINDER_GL_ES
+ 	#define CINDER_GL_ES_VERSION CINDER_GL_ES_VERSION_2
 #elif ! defined( CINDER_COCOA_TOUCH ) // OS X
 	#if defined( __clang__ )
 		#pragma clang diagnostic push

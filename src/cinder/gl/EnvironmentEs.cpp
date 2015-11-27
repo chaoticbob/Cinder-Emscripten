@@ -112,7 +112,7 @@ Environment* allocateEnvironmentEs()
 
 void EnvironmentEs::initializeFunctionPointers()
 {
-#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	::gl_es_load();
 
 /*

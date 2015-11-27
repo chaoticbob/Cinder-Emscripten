@@ -54,7 +54,7 @@ class Timer {
 	double	mStartTime, mEndTime;
 #elif (defined( CINDER_MSW ) || defined( CINDER_WINRT ))
 	double	mStartTime, mEndTime, mInvNativeFreq;
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	double	mStartTime, mEndTime;
 #endif
 };

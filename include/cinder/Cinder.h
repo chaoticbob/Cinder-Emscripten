@@ -85,6 +85,8 @@ using std::uint64_t;
 #elif defined(__ANDROID__) && (defined(linux) || defined(__linux) || defined(__linux__))
     #define CINDER_ANDROID
 	#include <android/api-level.h>
+#elif defined(__EMSCRIPTEN__)
+	#define CINDER_EMSCRIPTEN
 #else
 	#error "cinder compile error: Unknown platform"
 #endif

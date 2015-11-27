@@ -48,6 +48,9 @@
 #elif defined( CINDER_LINUX ) 
 	#include "cinder/UrlImplCurl.h"
 	typedef cinder::IStreamUrlImplCurl		IStreamUrlPlatformImpl;
+#elif defined( CINDER_EMSCRIPTEN ) 
+	#include "cinder/UrlImplNull.h"
+	typedef cinder::IStreamUrlImplNull		IStreamUrlPlatformImpl;
 #else
 	#include "cinder/UrlImpl.h"
 	typedef cinder::IStreamUrlImplCurl		IStreamUrlPlatformImpl;

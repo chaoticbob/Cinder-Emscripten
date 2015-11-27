@@ -99,6 +99,10 @@ typedef std::shared_ptr<Window>		WindowRef;
 	namespace cinder { namespace app {
 		class WindowImplLinux;
 	} } // namespace cinder::app
+#elif defined( CINDER_EMSCRIPTEN )
+	namespace cinder { namespace app {
+		class WindowImplEmscripten;
+	} } // namespace cinder::app
 #endif
 
 namespace cinder { namespace app {
@@ -436,9 +440,11 @@ class Window : public std::enable_shared_from_this<Window> {
 #elif defined( CINDER_WINRT )
 	static WindowRef		privateCreate__( WindowImplWinRt *impl, AppBase *app )
 #elif defined( CINDER_ANDROID )
-  static WindowRef    privateCreate__( WindowImplAndroid *impl, AppBase *app )
+	static WindowRef    	privateCreate__( WindowImplAndroid *impl, AppBase *app )
 #elif defined( CINDER_LINUX )
-  static WindowRef    privateCreate__( WindowImplLinux *impl, AppBase *app )
+	static WindowRef    	privateCreate__( WindowImplLinux *impl, AppBase *app )
+#elif defined( CINDER_EMSCRIPTEN )
+	static WindowRef		privateCreate__( WindowImplEmscripten *impl, AppBase *app )
 #else
 	static WindowRef		privateCreate__( WindowImplCocoa *impl, AppBase *app )
 #endif
@@ -474,9 +480,11 @@ class Window : public std::enable_shared_from_this<Window> {
 #elif defined( CINDER_WINRT )
 	void		setImpl( WindowImplWinRt *impl ) { mImpl = impl; }
 #elif defined( CINDER_ANDROID )
-  void    setImpl( WindowImplAndroid *impl ) { mImpl = impl; }    
+	void		setImpl( WindowImplAndroid *impl ) { mImpl = impl; }    
 #elif defined( CINDER_LINUX )
-  void    setImpl( WindowImplLinux *impl ) { mImpl = impl; }    
+	void		setImpl( WindowImplLinux *impl ) { mImpl = impl; }    
+#elif defined( CINDER_EMSCRIPTEN )
+	void		setImpl( WindowImplEmscripten *impl ) { mImpl = impl; }    
 #endif
 
 	AppBase							*mApp;
@@ -503,6 +511,8 @@ class Window : public std::enable_shared_from_this<Window> {
 	WindowImplAndroid	*mImpl;
 #elif defined( CINDER_LINUX )
 	WindowImplLinux		*mImpl;
+#elif defined( CINDER_EMSCRIPTEN )
+	WindowImplEmscripten	*mImpl;
 #endif
  
 private:
@@ -512,6 +522,9 @@ private:
 #elif defined( CINDER_LINUX )
 	friend class AppImplLinux;
 	WindowImplLinux     *getImpl() { return mImpl; }
+#elif defined( CINDER_EMSCRIPTEN )
+	friend class AppImplEmscripten;
+	WindowImplEmscripten	*getImpl() { return mImpl; }
 #endif    
 };
 
