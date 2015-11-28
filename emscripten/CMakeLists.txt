@@ -1,6 +1,11 @@
 cmake_minimum_required( VERSION 3.1 FATAL_ERROR )
 set( CMAKE_VERBOSE_MAKEFILE on )
 
+# Suppress compiler checks. Why? CMake seems to be inconsistent
+# with how it checks compilers on different platforms.
+set( CMAKE_C_COMPILER_WORKS   1 )
+set( CMAKE_CXX_COMPILER_WORKS 1 )
+
 get_filename_component( CINDER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE )
 set( CINDER_INC_DIR ${CINDER_DIR}/include )
 set( CINDER_SRC_DIR ${CINDER_DIR}/src )

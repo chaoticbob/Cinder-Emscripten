@@ -45,7 +45,7 @@
 #elif defined( CINDER_WINRT )
 	#include <dwrite.h>
 	#include "cinder/winrt/FontEnumerator.h"
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
  	#include "ft2build.h"
 	#include FT_FREETYPE_H 
 	#include FT_OUTLINE_H 
@@ -97,7 +97,7 @@ class FontObj : public std::enable_shared_from_this<FontObj> {
 	std::vector<std::pair<uint16_t,uint16_t> >	mUnicodeRanges;
 	void *mFileData;
 	FT_Face mFace;
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	BufferRef				mFileData;
 	FT_Face 				mFace = nullptr;
 	void 					releaseFreeTypeFace();
@@ -122,14 +122,14 @@ class FontManager
             mDefault = Font( "Helvetica", 12 );
 #elif defined( CINDER_MSW ) || defined( CINDER_WINRT )
             mDefault = Font( "Arial", 12 );
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
             mDefault = Font( "Roboto", 12 );
 #endif
 		
 		return mDefault;
 	}
 
-#if defined( CINDER_ANDROID )
+#if defined( CINDER_ANDROID ) || defined( CINDER_EMSCRIPTEN )
 	struct FontInfo {
 		std::string 	key;
 		std::string 	name;
@@ -164,14 +164,14 @@ class FontManager
 	Gdiplus::Graphics	*mGraphics;
 #elif defined( CINDER_WINRT )
 	FT_Library			mLibrary = nullptr;
-#elif defined( CINDER_ANDROID )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_EMSCRIPTEN )
 	FT_Library				mLibrary;
 	std::vector<FontInfo>	mFontInfos;
 #elif defined( CINDER_LINUX )	
 	FT_Library			mLibrary;
 #endif
 
-#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	std::set<std::shared_ptr<ci::FontObj>>	mTrackedFonts;
 	void fontCreated( const std::shared_ptr<ci::FontObj>& fontObj ) {
 		mTrackedFonts.insert( fontObj );
@@ -187,14 +187,14 @@ class FontManager
 	friend class Font;
 	friend class FontObj;
 
-#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	friend void FontManager_destroyStaticInstance();
 #endif	
 };
 
 FontManager* FontManager::sInstance = nullptr;
 
-#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 void FontManager_destroyStaticInstance() 
 {
 	if( nullptr != FontManager::sInstance ) {
@@ -265,7 +265,7 @@ FontManager::~FontManager()
 	[nsFontManager release];
 #elif defined( CINDER_WINRT )
 	FT_Done_FreeType(mLibrary);
-#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#elif defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	for( auto& fontObj : mTrackedFonts ) {
 		if( fontObj ) {
 			fontObj->releaseFreeTypeFace();
