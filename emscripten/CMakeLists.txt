@@ -19,12 +19,12 @@ set( CMAKE_CXX_CREATE_STATIC_LIBRARY 	"<CMAKE_AR> -o <TARGET> <LINK_FLAGS> <OBJE
 # C Flags
 set( C_FLAGS "-fvisibility=default -D_UNIX -DCINDER_GL_ES_2 -s FULL_ES2=1 -s USE_GLFW=3" )
 set( CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} -g -O0" )
-set( CMAKE_C_FLAGS_RELEASE "${C_FLAGS} -O3 -ffast-math" )
+set( CMAKE_C_FLAGS_RELEASE "${C_FLAGS} -Os" )
 
 # CPP Flags
 set( CXX_FLAGS "-stdlib=libc++ -std=c++11 -fvisibility=default -D_UNIX -DCINDER_GL_ES_2 -s FULL_ES2=1 -s USE_GLFW=3 -s DEMANGLE_SUPPORT=1" )
 set( CMAKE_CXX_FLAGS_DEBUG    "${CXX_FLAGS} -g -O0 -fexceptions -frtti" )
-set( CMAKE_CXX_FLAGS_RELEASE  "${CXX_FLAGS} -O3 -fexceptions -frtti -ffast-math" )
+set( CMAKE_CXX_FLAGS_RELEASE  "${CXX_FLAGS} -Os -fexceptions -frtti" )
 
 list( APPEND CINDER_C_SRC_FILES
     ${CINDER_SRC_DIR}/linebreak/linebreak.c
@@ -248,3 +248,6 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CINDER_LIB_DIR}" )
 add_library( cinder STATIC ${CINDER_C_SRC_FILES} ${CINDER_CXX_SRC_FILES} )
 
 target_include_directories( cinder PUBLIC "$<BUILD_INTERFACE:${CINDER_INCLUDE_DIRS};${CINDER_INCLUDE_DEPENDS}>" )
+
+set_target_properties( cinder PROPERTIES DEBUG_POSTFIX "_d" )
+
