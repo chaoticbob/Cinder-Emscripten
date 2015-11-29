@@ -1,8 +1,8 @@
 
-# include(${CMAKE_CURRENT_LIST_DIR}/DebugColours.cmake)
-#
-# execute_process( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE CINDER_ARCH )
-# execute_process( COMMAND which clang OUTPUT_VARIABLE CLANG_PATH )
+# Assume Debug if a build type isn't specified
+if( "" STREQUAL "${CMAKE_BUILD_TYPE}" )
+    set( CMAKE_BUILD_TYPE "Debug" CACHE FILEPATH "" FORCE )
+endif()
 
 ### Force some Emscripten CMake variables. CMake seems to be really particular
 ### about when these vars show up. They need to come after project.
@@ -25,3 +25,8 @@ get_filename_component( CINDER_INC_DIR "${CINDER_DIR}/include" ABSOLUTE )
 get_filename_component( CINDER_LIB_DIR "${CINDER_DIR}/lib"     ABSOLUTE )
 
 set( CMAKE_DEBUG_POSTFIX "_d" )
+
+if( "Debug" STREQUAL "${CMAKE_BUILD_TYPE}" )
+    set( CINDER_LIB_SUFFIX "_d" CACHE FILEPATH "" FORCE )
+endif()
+

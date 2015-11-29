@@ -6,6 +6,11 @@ set( CMAKE_VERBOSE_MAKEFILE on )
 set( CMAKE_C_COMPILER_WORKS   1 )
 set( CMAKE_CXX_COMPILER_WORKS 1 )
 
+# Assume Debug if a build type isn't specified
+if( "" STREQUAL "${CMAKE_BUILD_TYPE}" )
+    set( CMAKE_BUILD_TYPE "Debug" CACHE FILEPATH "" FORCE )
+endif()
+
 get_filename_component( CINDER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE )
 set( CINDER_INC_DIR ${CINDER_DIR}/include )
 set( CINDER_SRC_DIR ${CINDER_DIR}/src )

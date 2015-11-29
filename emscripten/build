@@ -1,18 +1,6 @@
 #!/bin/bash
-
-# Requires the bleeding edge Emscripten:
-#	cd ${YOUR_EMSCRIPTEN_DIR}
-#   ./emsdk update
-#   ./emsdk install --build=Release sdk-incoming-64bit
-#   ./emsdk activate --build=Release sdk-incoming-64bit
-#
-# Source the emsdk_env.sh before you do anything:
-#   source ${YOUR_EMSCRIPTEN_DIR}/emsdk_env.sh
-# 	
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-mkdir -p ${DIR}/Debug
-cd ${DIR}/Debug
-cmake -DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=Debug ..
-make -j `getconf _NPROCESSORS_ONLN` VERBOSE=1
+if [ "$#" -eq 0 ]; then
+	../tools/emscripten/cbuilder -b Debug
+else
+	../tools/emscripten/cbuilder "$@"
+fi
