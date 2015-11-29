@@ -12,6 +12,7 @@ if (( $# == 0 )); then
     echo -e "\t-j [n]   Number of compile processes, ex: -j 4"
     echo -e ""
     echo -e "flags:"
+	echo -e "\t-es3     Build for OpenGL ES 3.0 instead of OpenGL ES 2.0"
     echo -e "\t-r       Rebuild instead of full build"
     echo -e "\t-v       Turns on verbose mode"
     #echo -e ""
@@ -26,6 +27,8 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 CLEAN=false
 BUILD_TYPES=(Debug)
 NUMPROCS=$( nproc )
+GLES="-DCINDER_GL_ES_2=1"
+OPENGL_PLAT="es2"
 FULLBUILD=true
 VERBOSE=
 APP_BUILD=false
@@ -88,6 +91,13 @@ do
 			shift 2
         ;;
 
+        # OpenGL ES 3.0
+        -es3)
+            GLES="-DCINDER_GL_ES_3=1"
+			OPENGL_PLAT="es3"
+			shift 1
+        ;;
+
         # Rebuild
         -r)
 			FULLBUILD=false
@@ -122,12 +132,12 @@ done
 
 for build in ${BUILD_TYPES[@]}; do
 	build_type=${build}
-	build_dir=$(pwd)/${build}
+	build_dir=$(pwd)/${build}/${OPENGL_PLAT}
 
 	if [ ${APP_BUILD} == true ]; then
-		build_dir=$(pwd)/${build}
+		build_dir=$(pwd)/${build}/${OPENGL_PLAT}
 	else
-		build_dir=${SCRIPT_DIR}/../../emscripten/${build}
+		build_dir=${SCRIPT_DIR}/../../emscripten/${build}/${OPENGL_PLAT}
 	fi
 
 	# Clean
@@ -165,9 +175,9 @@ for build in ${BUILD_TYPES[@]}; do
 
 	cd ${build_dir}
 	if [ ${FULLBUILD} == true ] || [ ! -f "${build_dir}/CMakeCache.txt" ]; then
-		echo "CMAKE COMMAND: cmake .. -DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=${build_type} ${SAMPLES}"
+		echo "CMAKE COMMAND: cmake .. -DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=${build_type} ${GLES} ${SAMPLES}"
 
-		cmake .. -DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=${build_type} ${SAMPLES}
+		cmake ../.. -DCMAKE_TOOLCHAIN_FILE=${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=${build_type} ${GLES} ${SAMPLES}
 	fi
 	make -j ${NUMPROCS} ${VERBOSE}
 

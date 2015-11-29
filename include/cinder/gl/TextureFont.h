@@ -172,7 +172,7 @@ class TextureFont {
 	Font											mFont;
 	Format											mFormat;
 
-#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX )
+#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	std::map<Font::Glyph, Font::GlyphMetrics>  mCachedGlyphMetrics;
 	const std::map<Font::Glyph, Font::GlyphMetrics>* getCachedGlyphMetrics() const
 	{ return mCachedGlyphMetrics.empty() ? nullptr : &mCachedGlyphMetrics; }

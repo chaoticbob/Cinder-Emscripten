@@ -45,7 +45,7 @@ target_include_directories(
 
 target_link_libraries( 
 	"${EXE_NAME}" 
-	${CINDER_LIB_DIR}/emscripten/libcinder${CINDER_LIB_SUFFIX}.bc
+	${CINDER_LIB_DIR}/emscripten/${CINDER_OPENGL_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
 	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
 	${CINDER_LIB_DIR}/emscripten/libboost_system.a
 )
