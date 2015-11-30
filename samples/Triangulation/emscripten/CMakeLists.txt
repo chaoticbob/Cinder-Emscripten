@@ -1,18 +1,18 @@
-# TriangulationApp
+# Triangulation
 cmake_minimum_required( VERSION 3.1 FATAL_ERROR )
 set( CMAKE_VERBOSE_MAKEFILE on )
 
 get_filename_component( CINDER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE )
 include( ${CINDER_DIR}/emscripten/cmake/Cinder.cmake )
 
-project( TriangulationApp )
+project( Triangulation )
 
 # For Emscripten we need to do this again since project() resets some vars .
 include( ${CINDER_DIR}/emscripten/cmake/Cinder.cmake )
 
 get_filename_component( SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src" ABSOLUTE )
 get_filename_component( INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE )
-set( ASSETS_DIR "../../assets@/" )
+set( ASSETS_DIR "../../../assets@/" )
 
 #if( NOT TARGET cinder${CINDER_LIB_SUFFIX} )
 #    find_package( cinder REQUIRED
@@ -43,7 +43,7 @@ target_include_directories(
 
 target_link_libraries( 
 	"${EXE_NAME}" 
-	${CINDER_LIB_DIR}/emscripten/${CINDER_OPENGL_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
+	${CINDER_LIB_DIR}/emscripten/${CINDER_GL_ES_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
 	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
 	${CINDER_LIB_DIR}/emscripten/libboost_system.a
 )
