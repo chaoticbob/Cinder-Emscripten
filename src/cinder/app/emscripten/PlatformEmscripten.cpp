@@ -83,30 +83,7 @@ fs::path PlatformEmscripten::getResourcePath( const fs::path &rsrcRelativePath )
 {
 	if( ! mResourceDirsInitialized ) {
 		mResourceDirsInitialized = true;
-		// First search the local directory, then its parent, up to ASSET_SEARCH_DEPTH levels up
-		// check at least the app path, even if it has no parent directory.
-		auto execPath = getExecutablePath();
-		size_t parentCt = 0;
-		for( fs::path curPath = execPath; curPath.has_parent_path() || ( curPath == execPath ); curPath = curPath.parent_path(), ++parentCt ) {
-			if( parentCt >= RESOURCE_SEARCH_DEPTH ) {
-				break;
-			}
-			const fs::path curResourceDir = curPath / fs::path( "resources" );
-			if( fs::exists( curResourceDir ) && fs::is_directory( curResourceDir ) ) {
-				auto it = std::find( mResourceDirectories.begin(), mResourceDirectories.end(), curResourceDir );
-				if( it == mResourceDirectories.end() ) {
-					mResourceDirectories.push_back( curResourceDir );
-				}
-				break;
-			}
-		}
-
-		// Next add the executable's directory in case the resource is specified with
-		// a path that doesn't contain a 'resources' directory.
-		mResourceDirectories.push_back( execPath.parent_path() );
-
-		// Finally add the current working directory for the same reason as above.
-		mResourceDirectories.push_back( fs::current_path() );
+		mResourceDirectories.push_back( "/" );
 	}
 
 	for( const auto &directory : mResourceDirectories ) {

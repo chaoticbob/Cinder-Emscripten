@@ -12,7 +12,7 @@ include( ${CINDER_DIR}/emscripten/cmake/Cinder.cmake )
 
 get_filename_component( SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src" ABSOLUTE )
 get_filename_component( INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE )
-set( ASSETS_DIR "../../../assets@/" )
+set( ASSETS_DIR "../../../resources@/" )
 
 #if( NOT TARGET cinder${CINDER_LIB_SUFFIX} )
 #    find_package( cinder REQUIRED
@@ -29,7 +29,7 @@ set( SRC_FILES
 )
 
 set( CMAKE_EXECUTABLE_SUFFIX ".html" )
-if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../assets" )
+if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../resources" )
 	set( CMAKE_EXE_LINKER_FLAGS  "--preload-file ${ASSETS_DIR}" )
 endif()
 
