@@ -34,6 +34,8 @@ void TextureFontApp::setup()
 	mFont = Font( "Times New Roman", 48 );
 #elif defined( CINDER_LINUX )
 	mFont = Font( "Times New Roman", 24 );
+#elif defined( CINDER_EMSCRIPTEN )
+	mFont = Font( "Times New Roman", 24 );
 #endif
 	mTextureFont = gl::TextureFont::create( mFont );
 }
