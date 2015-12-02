@@ -114,6 +114,14 @@ Renderbuffer::Renderbuffer( int width, int height, GLenum internalFormat, int ms
 		else if( mInternalFormat == GL_DEPTH_COMPONENT ) {
 			mInternalFormat = GL_DEPTH_COMPONENT24_OES;	
 		}
+
+
+  	#if defined( CINDER_EMSCRIPTEN )
+		// Emscripten's ES2 doesn't seem to like GL_DEPTH_COMPONENT24, so force GL_DEPTH_COMPONENT16 for now.
+		if( ( mInternalFormat == GL_DEPTH_COMPONENT ) || ( mInternalFormat == GL_DEPTH_COMPONENT24 ) ) {
+			mInternalFormat = GL_DEPTH_COMPONENT16;
+		}
+  	#endif
 #endif
 		glRenderbufferStorage( GL_RENDERBUFFER, mInternalFormat, mWidth, mHeight );
 	}
