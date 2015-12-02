@@ -397,8 +397,8 @@ void TextureBase::getInternalFormatInfo( GLint internalFormat, GLenum *outDataFo
 
 		// SIZED DEPTH FORMATS
 		case GL_DEPTH_COMPONENT16:	dataFormat = GL_DEPTH_COMPONENT; dataType = GL_UNSIGNED_SHORT;				break;
-#if ! defined( CINDER_GL_ES_2 )
 		case GL_DEPTH_COMPONENT24:	dataFormat = GL_DEPTH_COMPONENT; dataType = GL_UNSIGNED_INT;					break;
+#if ! defined( CINDER_GL_ES_2 )
 		case GL_DEPTH_COMPONENT32F:	dataFormat = GL_DEPTH_COMPONENT; dataType = GL_FLOAT;							break;
 		case GL_DEPTH24_STENCIL8:	dataFormat = GL_DEPTH_STENCIL;	dataType = GL_UNSIGNED_INT_24_8;				break;
 		case GL_DEPTH32F_STENCIL8:	dataFormat = GL_DEPTH_STENCIL;	dataType = GL_FLOAT_32_UNSIGNED_INT_24_8_REV;	break;
