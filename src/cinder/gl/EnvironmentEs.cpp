@@ -346,6 +346,8 @@ std::string	EnvironmentEs::generateVertexShader( const ShaderDef &shader )
 	ss << "#version 320 es";
   #endif
 
+	ss << "precision highp float;";
+
 	ss << "uniform mat4 ciModelViewProjection;";
 	ss << "in vec4      ciPosition;";
 
