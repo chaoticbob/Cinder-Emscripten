@@ -89,7 +89,9 @@ class EnvironmentEs : public Environment {
 	bool 	supportsInstancedArrays() const override;
 	bool	supportsTextureLod() const override;
 	bool	supportsGeometryShader() const override;
-	bool	supportsTessellationShader() const override;	
+	bool	supportsTessellationShader() const override;
+	bool	supportsMapBuffer() const override;
+	bool	supportsMapBufferRange() const override;
 
 	GLenum	getPreferredIndexType() const override;
 		
@@ -228,6 +230,18 @@ bool EnvironmentEs::supportsTessellationShader() const
 	return result;
 }
 
+bool EnvironmentEs::supportsMapBuffer() const
+{
+	static bool result = isExtensionAvailable( "GL_OES_mapbuffer" );
+	return result;
+}
+
+bool EnvironmentEs::supportsMapBufferRange() const
+{
+	static bool result = isExtensionAvailable( "GL_EXT_map_buffer_range" );
+	return result;
+}
+
 GLenum EnvironmentEs::getPreferredIndexType() const
 {
 #if defined( CINDER_GL_ES_2 )
@@ -345,6 +359,8 @@ std::string	EnvironmentEs::generateVertexShader( const ShaderDef &shader )
   #elif ( CINDER_GL_ES_VERSION == CINDER_GL_ES_VERSION_3_2 )
 	ss << "#version 320 es";
   #endif
+
+	ss << "precision highp float;";
 
 	ss << "uniform mat4 ciModelViewProjection;";
 	ss << "in vec4      ciPosition;";

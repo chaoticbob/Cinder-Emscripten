@@ -566,7 +566,7 @@ void VboMesh::bufferAttrib( geom::Attrib attrib, size_t dataSizeBytes, const voi
 		
 		layoutVbo->second->unmap();
 #else
-		CI_LOG_E( "Platform OpenGL does not support bufferAttrib() with interleaved data" );
+		CI_LOG_E( "Platform's OpenGL does not support bufferAttrib() with interleaved data" );
 #endif		
 	}
 }
