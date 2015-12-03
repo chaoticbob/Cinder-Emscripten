@@ -143,8 +143,20 @@ void* BufferObj::mapReplace()
 	ScopedBuffer bufferBind( mTarget, mId );
 	void* result = nullptr;
 #if defined( CINDER_GL_HAS_MAP_BUFFER_RANGE )
+  // Runtime check on ES2 for glMapBuferRange
+  #if defined( CINDER_GL_ES ) && ( CINDER_GL_ES_VERSION <= CINDER_GL_ES_VERSION_2 )
+  	if( gl::env()->supportsMapBufferRange() ) {
+		GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
+		result = reinterpret_cast<void*>( glMapBufferRange( mTarget, 0, mSize, access ) );
+  	}
+  	else if( gl::env()->supportsMapBuffer() ) {
+		glBufferData( mTarget, mSize, nullptr, mUsage );
+		result = reinterpret_cast<void*>( glMapBuffer( mTarget, GL_WRITE_ONLY ) );
+  	}
+  #else
 	GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 	result = reinterpret_cast<void*>( glMapBufferRange( mTarget, 0, mSize, access ) );
+  #endif
 #elif defined( CINDER_GL_HAS_MAP_BUFFER )
 	glBufferData( mTarget, mSize, nullptr, mUsage );
 	result = reinterpret_cast<void*>( glMapBuffer( mTarget, GL_WRITE_ONLY ) );
