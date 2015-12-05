@@ -47,6 +47,8 @@
 	#endif
 #elif (defined(linux) || defined(__linux) || defined(__linux__)) && ! defined(__ANDROID__)
 	#define CINDER_RESOURCE( LOCALPREFIX, PATH, ID, TYPE ) #LOCALPREFIX #PATH
+#elif defined(__EMSCRIPTEN__)
+	#define CINDER_RESOURCE( LOCALPREFIX, PATH, ID, TYPE ) #LOCALPREFIX #PATH
 #else // MAC or iOS RESOURCE
 	#define CINDER_RESOURCE( LOCALPREFIX, PATH, ID, TYPE ) #PATH
 #endif
