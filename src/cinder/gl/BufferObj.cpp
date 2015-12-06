@@ -125,18 +125,33 @@ void* BufferObj::map( GLenum access ) const
 #endif
 
 #if defined( CINDER_GL_HAS_MAP_BUFFER ) || defined( CINDER_GL_HAS_MAP_BUFFER_RANGE )
+#if ! defined( CINDER_EMSCRIPTEN )
+// NOTE: From library_gl.js: glMapBufferRange is only supported when access is MAP_WRITE|INVALIDATE_BUFFER.
 void* BufferObj::mapWriteOnly()
 {
 	void* result = nullptr;
 	ScopedBuffer bufferBind( mTarget, mId );
 #if defined( CINDER_GL_HAS_MAP_BUFFER_RANGE )
 	GLbitfield access = GL_MAP_WRITE_BIT;
+  #if defined( CINDER_GL_ES ) && ( CINDER_GL_ES_VERSION <= CINDER_GL_ES_VERSION_2 )
+  	if( gl::env()->supportsMapBufferRange() ) {
+	    result = reinterpret_cast<void*>( glMapBufferRange( mTarget, 0, mSize, access ) );
+    }
+  #else
 	result = reinterpret_cast<void*>( glMapBufferRange( mTarget, 0, mSize, access ) );
+  #endif 
 #elif defined( CINDER_GL_HAS_MAP_BUFFER )
+  #if defined( CINDER_GL_ES ) && ( CINDER_GL_ES_VERSION <= CINDER_GL_ES_VERSION_2 )
+  	if( gl::env()->supportsMapBuffer() ) {
+	    result = reinterpret_cast<void*>( glMapBuffer( mTarget, GL_WRITE_ONLY ) );
+    }
+  #else
 	result = reinterpret_cast<void*>( glMapBuffer( mTarget, GL_WRITE_ONLY ) );
+  #endif
 #endif
 	return result;
 }
+#endif // ! defined( CINDER_EMSCRIPTEN )
 
 void* BufferObj::mapReplace()
 {

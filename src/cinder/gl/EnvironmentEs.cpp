@@ -210,7 +210,7 @@ bool EnvironmentEs::supportsInstancedArrays() const
 
 bool EnvironmentEs::supportsTextureLod() const
 {
-#if defined( CINDER_COCOA_TOUCH ) || defined( CINDER_GL_ES_3 )
+#if defined( CINDER_COCOA_TOUCH ) || ( CINDER_GL_ES_VERSION >= CINDER_GL_ES_VERSION_3 )
 	return true;
 #else
 	static bool result = isExtensionAvailable( "GL_EXT_shader_texture_lod" );
@@ -238,8 +238,12 @@ bool EnvironmentEs::supportsMapBuffer() const
 
 bool EnvironmentEs::supportsMapBufferRange() const
 {
+#if ( CINDER_GL_ES_VERSION >= CINDER_GL_ES_VERSION_3 )
+    return true;
+#else
 	static bool result = isExtensionAvailable( "GL_EXT_map_buffer_range" );
 	return result;
+#endif
 }
 
 GLenum EnvironmentEs::getPreferredIndexType() const
