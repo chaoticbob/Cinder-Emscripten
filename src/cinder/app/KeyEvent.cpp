@@ -484,9 +484,9 @@ int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
 		return sKeyTable[nativeKeyCode];
 }
 
-#elif defined( CINDER_LINUX )
+#elif defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 
-#if defined( CINDER_LINUX_EGL_ONLY )
+#if defined( CINDER_LINUX_EGL_ONLY ) // EGL only - RPI2 and such
 
 static bool sTableInited = false;
 static const int MAX_KEYCODE = 1024;
@@ -654,7 +654,7 @@ int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
 		return sKeyTable[nativeKeyCode];
 }
 
-#else
+#else // GLFW
 
 #include "glfw/glfw3.h"
 static bool sTableInited = false;
@@ -812,13 +812,6 @@ int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
 
 #endif
 
-#elif defined( CINDER_EMSCRIPTEN )
-
-int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
-{
-	return 0;
-}
-
-#endif // defined( CINDER_EMSCRIPTEN )
+#endif // defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 	
 } } // namespace cinder::app
