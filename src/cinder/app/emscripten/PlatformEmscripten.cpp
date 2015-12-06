@@ -67,9 +67,38 @@ void PlatformEmscripten::cleanupLaunch()
 DataSourceRef PlatformEmscripten::loadResource( const fs::path &resourcePath ) 
 {
 	fs::path fullPath = getResourcePath( resourcePath );
+
+	// On Emscripten we can't go beyond the root of the virtual fs. Walk the
+	// path towards the basename in hopes we find something.
+	if( fullPath.empty() ) {
+		std::vector<fs::path> parts;
+		for( const auto& part : resourcePath ) {			
+			parts.push_back( part );
+		}
+
+		for( auto outerIter = parts.begin(); outerIter != parts.end(); ++outerIter ) {
+			auto innerIter = outerIter;
+
+			fs::path path;
+			for( ; innerIter != parts.end(); ++innerIter ) {
+				if( ! path.empty() ) {
+					path /= *innerIter;
+				}
+				else {
+					path = *innerIter;
+				}
+			}
+
+			fullPath = getResourcePath( path );
+			if( ! fullPath.empty() ) {
+				break;
+			}
+		}
+	}
+
 	if( fullPath.empty() )
 		throw ResourceLoadExc( std::string( "Could not resolve absolute path for: " ) + resourcePath.string() );
-	else
+	else 
 		return DataSourcePath::create( fullPath );	
 }
 
