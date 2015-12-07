@@ -50,6 +50,17 @@ python -m SimpleHTTPServer 8000
 ```
 Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000``. Click on the ``BasicApp.html`` file. You should see BasicApp in your browser.
 
+#### Building _opengl/Cube
+Source the emsdk_env.sh before you do anything:
+```
+source ${YOUR_EMSCRIPTEN_DIR}/emsdk_env.sh
+```
+Once that is done, you're ready to build:
+```
+cd ${YOUR_CINDER_DIR}/samples/_opengl/Cube/emscripten
+./build
+```
+
 #### Running _opengl/Cube
 Lets use the SimpleHTTPServer that comes with Python:
 ```
