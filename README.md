@@ -6,7 +6,6 @@
 
 <br/>
 <br/>
-<br/>
 
 Welcome to the very experimental and unofficial port of Cinder to Emscripten. This is a 'for messing around with' port. It should not be used for production. Use at your own risk. :) 
 
@@ -61,6 +60,19 @@ Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.
 
 <br/>
 <br/>
+
+#### FAQ
+* Noticed that ``es`` is in the path for the samples - do any of the ES3 samples work?
+ *  Yes. You'll need to use FireFox nightly or Chrome Canary with WebGL2 enabled. 
+* Does audio work?
+ *  Not yet. Feel free to make a PR.
+* Does video playback work?
+ *  Not yet. Feel free to make a PR.
+* What about all the stuff from the HTML5 api?
+ *  These will get added as time allows. Feel free to make a PR.
+  
+<br/>
+<br/>
 <br/>
 
 ### Cinder 0.9.1dev: [libcinder.org](http://libcinder.org)
@@ -83,3 +95,4 @@ Cinder supports OS X, Windows and iOS. It requires Xcode 5.1.1 or later for deve
 Cinder is released under the [Modified BSD License](docs/COPYING). Please visit [our website](https://libcinder.org) for more information.
 
 Also be sure to check the [User Forum](http://forum.libcinder.org/#AllForums).
+
