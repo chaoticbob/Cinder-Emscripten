@@ -1,3 +1,13 @@
+### Cinder 0.9.1dev: [libcinder.org](http://libcinder.org)
+
+<p align="center">
+  <img src="https://libcinder.org/docs/_assets/images/cinder_logo.svg" alt="Cinder Logo" width="256" height="auto"/>
+</p>
+
+<br/>
+<br/>
+<br/>
+
 Welcome to the very experimental and unofficial port of Cinder to Emscripten. This is a 'for messing around with' port. It should not be used for production. Use at your own risk. :) 
 
 You are welcome to report any issues here - on this repo. You are also welcome to make any Pull Requests against this repo. 
@@ -39,7 +49,19 @@ Lets use the SimpleHTTPServer that comes with Python:
 cd ${YOUR_CINDER_DIR}/samples/BasicApp/emscripten/Debug/es2
 python -m SimpleHTTPServer 8000
 ```
-Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000`.
+Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000``. Click on the ``BasicApp.html`` file. You should see BasicApp in your browser.
+
+#### Running _opengl/Cube
+Lets use the SimpleHTTPServer that comes with Python:
+```
+cd ${YOUR_CINDER_DIR}/samples/_opengl/Cube/emscripten/Debug/es2
+python -m SimpleHTTPServer 8000
+```
+Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000``. Click on the ``Cube.html`` file. You should see BasicApp in your browser.
+
+<br/>
+<br/>
+<br/>
 
 ### Cinder 0.9.1dev: [libcinder.org](http://libcinder.org)
 
