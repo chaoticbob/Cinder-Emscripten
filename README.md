@@ -67,12 +67,14 @@ Lets use the SimpleHTTPServer that comes with Python:
 cd ${YOUR_CINDER_DIR}/samples/_opengl/Cube/emscripten/Debug/es2
 python -m SimpleHTTPServer 8000
 ```
-Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000``. Click on the ``Cube.html`` file. You should see BasicApp in your browser.
+Now open up your browser and goto: ```http://localhost:8000``` or ```http://127.0.0.1:8000``. Click on the ``Cube.html`` file. You should see a spinning Cube in your browser.
 
 <br/>
 <br/>
 
 #### FAQ
+* Which samples currently work?
+ *  Samples that can render using ES2 and do not have any direct hardware dependency.
 * Noticed that ``es`` is in the path for the samples - do any of the ES3 samples work?
  *  Yes. You'll need to use FireFox nightly or Chrome Canary with WebGL2 enabled. 
 * Does audio work?
