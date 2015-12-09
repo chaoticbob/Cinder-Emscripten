@@ -9,6 +9,8 @@
 
 Welcome to the very experimental and unofficial port of Cinder to Emscripten. This is a 'for messing around with' port. It should not be used for production. Use at your own risk. :) 
 
+You can find some demos that have been built with Cinder Emscripten here: [http://chaoticbob.github.io/Cinder-Emscripten](http://chaoticbob.github.io/Cinder-Emscripten).
+
 You are welcome to report any issues here - on this repo. You are also welcome to make any Pull Requests against this repo. 
 #### Installing Emscripten
 This requires the ``incoming`` version of Emscripten and CMake 3.1. It does not work with ``latest`` as far as I know. So grab the Emscripten portable SDK [from here](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html). Linux or OS X is hightly recommended! This has not been tested on Windows. Once you have it installed and are ready to go:
