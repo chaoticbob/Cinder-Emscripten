@@ -29,7 +29,7 @@ source ${YOUR_EMSCRIPTEN_DIR}/emsdk_env.sh
 Once that is done, you're ready to build:
 ```
 cd ${YOUR_CINDER_DIR}/emscripten
-./build
+./cibuild
 ```
 This should fire off the build process using Clang 3.8 (or later).
 
@@ -41,7 +41,7 @@ source ${YOUR_EMSCRIPTEN_DIR}/emsdk_env.sh
 Once that is done, you're ready to build:
 ```
 cd ${YOUR_CINDER_DIR}/samples/BasicApp/emscripten
-./build
+./cibuild
 ```
 
 #### Running BasicApp
@@ -60,7 +60,7 @@ source ${YOUR_EMSCRIPTEN_DIR}/emsdk_env.sh
 Once that is done, you're ready to build:
 ```
 cd ${YOUR_CINDER_DIR}/samples/_opengl/Cube/emscripten
-./build
+./cibuild
 ```
 
 #### Running _opengl/Cube
