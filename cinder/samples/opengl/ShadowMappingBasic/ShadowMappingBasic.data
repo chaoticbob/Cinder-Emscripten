@@ -1,0 +1,128 @@
+#version 100
+
+uniform mat4 ciModelViewProjection;
+uniform mat4 ciModelMatrix;
+uniform mat3 ciNormalMatrix;
+uniform mat4 ciModelView;
+uniform mat4 uShadowMatrix;
+
+attribute vec4	ciColor;
+attribute vec4	ciPosition;
+attribute vec3	ciNormal;
+attribute vec2  ciTexCoord0;
+
+varying lowp vec4 vColor;
+varying lowp vec3 vNormal;
+varying lowp vec4 vPosition;
+varying highp vec4 vShadowCoord;
+
+const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
+							  0.0, 0.5, 0.0, 0.0,
+							  0.0, 0.0, 0.5, 0.0,
+							  0.5, 0.5, 0.5, 1.0 );
+
+void main( void )
+{
+	vColor			= ciColor;
+	vPosition		= ciModelView * ciPosition;
+	vNormal			= normalize( ciNormalMatrix * ciNormal );
+	vShadowCoord	= ( biasMatrix * uShadowMatrix * ciModelMatrix ) * ciPosition;
+	gl_Position		= ciModelViewProjection * ciPosition;
+}#version 100
+
+uniform lowp vec3 uLightPos;
+uniform sampler2D uShadowMap;
+
+varying lowp vec4 vColor;
+varying lowp vec4 vPosition;
+varying lowp vec3 vNormal;
+varying highp vec4 vShadowCoord;
+
+void main( void )
+{
+
+	highp vec3 Normal		= normalize( vNormal );
+	highp vec3 LightVec		= normalize( uLightPos - vPosition.xyz );
+	highp float NdotL		= max( dot( vNormal, LightVec ), 0.0 );
+	
+	highp vec3 Diffuse		= vec3( NdotL );
+	highp vec3 Ambient		= vec3( 0.2 );
+
+	highp vec4 ShadowCoord	= vShadowCoord / vShadowCoord.w;
+	highp float Shadow		= 1.0;
+
+	if ( ShadowCoord.z > -1.0 && ShadowCoord.z < 1.0 ) {
+		// On Android and Linux GL_DEPTH_COMPONENT16 does not
+		// expand out into all 4 channels. So we have to
+		// use the .r/.x channel to sample.
+		highp float Dist = texture2D( uShadowMap, ShadowCoord.st ).x;
+
+		ShadowCoord.z -= 0.0005;
+		if ( ShadowCoord.w > 0.0 && Dist < ShadowCoord.z ) {
+			Shadow = 0.0;
+		}
+	}
+
+	gl_FragColor.rgb	= ( Diffuse * Shadow + Ambient ) * vColor.rgb;
+	gl_FragColor.a		= 1.0;
+}
+#version 150 core
+
+uniform mat4 ciModelViewProjection;
+uniform mat4 ciModelMatrix;
+uniform mat3 ciNormalMatrix;
+uniform mat4 ciModelView;
+uniform mat4 uShadowMatrix;
+
+in vec4	ciColor;
+in vec4	ciPosition;
+in vec3	ciNormal;
+
+out vec4 vColor;
+out vec3 vNormal;
+out vec4 vPosition;
+out vec4 vShadowCoord;
+
+const mat4 biasMatrix = mat4( 0.5, 0.0, 0.0, 0.0,
+							  0.0, 0.5, 0.0, 0.0,
+							  0.0, 0.0, 0.5, 0.0,
+							  0.5, 0.5, 0.5, 1.0 );
+
+void main( void )
+{
+	vColor			= ciColor;
+	vPosition		= ciModelView * ciPosition;
+	vNormal			= normalize( ciNormalMatrix * ciNormal );
+	vShadowCoord	= ( biasMatrix * uShadowMatrix * ciModelMatrix ) * ciPosition;
+	gl_Position		= ciModelViewProjection * ciPosition;
+}#version 150 core
+
+uniform vec3 uLightPos;
+uniform sampler2DShadow uShadowMap;
+
+in vec4 vColor;
+in vec4 vPosition;
+in vec3 vNormal;
+in vec4 vShadowCoord;
+
+out vec4 Color;
+
+void main( void )
+{
+	vec3 Normal			= normalize( vNormal );
+	vec3 LightVec		= normalize( uLightPos - vPosition.xyz );
+	float NdotL			= max( dot( vNormal, LightVec ), 0.0 );
+	
+	vec3 Diffuse		= vec3( NdotL );
+	vec3 Ambient		= vec3( 0.3 );
+	
+	vec4 ShadowCoord	= vShadowCoord / vShadowCoord.w;
+	float Shadow		= 1.0;
+	
+	if ( ShadowCoord.z > -1 && ShadowCoord.z < 1 ) {
+		Shadow = textureProj( uShadowMap, ShadowCoord, -0.00005 );
+	}
+
+	Color.rgb = ( Diffuse * Shadow + Ambient ) * vColor.rgb;
+	Color.a	= 1.0;
+}
