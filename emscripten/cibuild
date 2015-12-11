@@ -11,7 +11,7 @@
 # 
 
 if [ "$#" -eq 0 ]; then
-	../tools/emscripten/cbuilder -b Debug
+	../tools/emscripten/cibuilder -b Debug
 else
-	../tools/emscripten/cbuilder "$@"
+	../tools/emscripten/cibuilder "$@"
 fi
