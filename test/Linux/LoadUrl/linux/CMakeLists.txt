@@ -1,14 +1,15 @@
-# ImmediateMode
+# GStreamer Player.
 cmake_minimum_required( VERSION 3.0 FATAL_ERROR )
-set( CMAKE_VERBOSE_MAKEFILE on )
+set( CMAKE_VERBOSE_MAKEFILE ON )
 
 get_filename_component( CINDER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE )
-include( ${CINDER_DIR}/linux/cmake/Cinder.cmake )
 
-project( ImmediateMode )
+include(${CINDER_DIR}/linux/cmake/Cinder.cmake)
+
+project( LoadUrl )
 
 get_filename_component( SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src" ABSOLUTE )
-get_filename_component( INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE )
+get_filename_component( INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE ) 
 
 if( NOT TARGET cinder${CINDER_LIB_SUFFIX} )
     find_package( cinder REQUIRED
@@ -17,18 +18,17 @@ if( NOT TARGET cinder${CINDER_LIB_SUFFIX} )
     )
 endif()
 
-# Use PROJECT_NAME since CMAKE_PROJET_NAME returns the top-level project name.
-set( EXE_NAME ${PROJECT_NAME} )
-
 set( SRC_FILES
-	${SRC_DIR}/ImmediateModeApp.cpp
+    ${SRC_DIR}/LoadUrlApp.cpp
 )
+
+### CMAKE_PROJECT_NAME returns the top-level project name
+### if present so use PROJECT_NAME instead.
+set( EXE_NAME ${PROJECT_NAME} )
 
 add_executable( "${EXE_NAME}" ${SRC_FILES} )
 
-target_include_directories(
-	"${EXE_NAME}"
-	PUBLIC ${INC_DIR}
-)
+target_include_directories( "${EXE_NAME}" PRIVATE "${INC_DIR}" )
 
 target_link_libraries( "${EXE_NAME}" cinder${CINDER_LIB_SUFFIX} )
+
