@@ -12,7 +12,7 @@ include( ${CINDER_DIR}/emscripten/cmake/Cinder.cmake )
 
 get_filename_component( SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src" ABSOLUTE )
 get_filename_component( INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../include" ABSOLUTE )
-set( ASSETS_DIR "../../../resources@/" )
+set( ASSETS_DIR "../../../assets@/" )
 
 #if( NOT TARGET cinder${CINDER_LIB_SUFFIX} )
 #    find_package( cinder REQUIRED
@@ -29,7 +29,7 @@ set( SRC_FILES
 )
 
 set( CMAKE_EXECUTABLE_SUFFIX ".html" )
-if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../resources" )
+if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../assets" )
 	set( CMAKE_EXE_LINKER_FLAGS  "--preload-file ${ASSETS_DIR}" )
 endif()
 
@@ -44,6 +44,6 @@ target_include_directories(
 target_link_libraries( 
 	"${EXE_NAME}" 
 	${CINDER_LIB_DIR}/emscripten/${CINDER_GL_ES_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
-	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
-	${CINDER_LIB_DIR}/emscripten/libboost_system.a
+	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.bc
+	${CINDER_LIB_DIR}/emscripten/libboost_system.bc
 )

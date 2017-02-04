@@ -8,7 +8,7 @@ import stat
 print( "Samples Emscripten Build File Generate v0.001\n" )
 
 Build = """#!/bin/sh
-$<CINDER_REL_PATH>/tools/emscripten/cbuilder -app "$@"
+$<CINDER_REL_PATH>/tools/emscripten/cibuilder -app "$@"
 """
 
 CMakeListsTxt= """# $<APPNAME>
@@ -57,8 +57,8 @@ target_include_directories(
 target_link_libraries( 
 	"${EXE_NAME}" 
 	${CINDER_LIB_DIR}/emscripten/${CINDER_GL_ES_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
-	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
-	${CINDER_LIB_DIR}/emscripten/libboost_system.a
+	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.bc
+	${CINDER_LIB_DIR}/emscripten/libboost_system.bc
 )
 """
 
@@ -152,7 +152,7 @@ def generate_build( path, excludes ):
 			#appName = ("%sApp" % appName)
 
 		emscriptenPath = os.path.join( path, appDir, "emscripten" )
-		buildPath = os.path.join( emscriptenPath, "build" )
+		buildPath = os.path.join( emscriptenPath, "cibuild" )
 		cmakePath = os.path.join( emscriptenPath, "CMakeLists.txt" )
 
 		cinderRelPath = os.path.relpath( gCinderDir, os.path.abspath( emscriptenPath ) )

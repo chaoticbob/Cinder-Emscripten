@@ -25,12 +25,12 @@ set( ASSETS_DIR "../../../assets@/" )
 set( EXE_NAME ${PROJECT_NAME} )
 
 set( SRC_FILES
-	${SRC_DIR}/SceneObjects.cpp
-	${SRC_DIR}/Box2dUtils.cpp
-	${SRC_DIR}/SceneController.cpp
-	${SRC_DIR}/FallingGearsApp.cpp
-	${SRC_DIR}/Config.cpp
 	${SRC_DIR}/AudioController.cpp
+	${SRC_DIR}/Box2dUtils.cpp
+	${SRC_DIR}/Config.cpp
+	${SRC_DIR}/FallingGearsApp.cpp
+	${SRC_DIR}/SceneController.cpp
+	${SRC_DIR}/SceneObjects.cpp
 	${SRC_DIR}/Synths.cpp
 )
 
@@ -50,6 +50,6 @@ target_include_directories(
 target_link_libraries( 
 	"${EXE_NAME}" 
 	${CINDER_LIB_DIR}/emscripten/${CINDER_GL_ES_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
-	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
-	${CINDER_LIB_DIR}/emscripten/libboost_system.a
+	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.bc
+	${CINDER_LIB_DIR}/emscripten/libboost_system.bc
 )
