@@ -27,7 +27,7 @@
 #include "cinder/Cinder.h"
 #include "cinder/Exception.h"
 
-#if defined( CINDER_WINRT )
+#if defined( CINDER_UWP )
 	#include <agile.h>
 	#undef min
 	#undef max
@@ -90,9 +90,9 @@ class Renderer {
 	#endif
 	virtual CGContextRef	getCgContext() { throw; } // the default behavior is failure
 
-	virtual void	setFrameSize( int width, int height ) {}		
+	virtual void	setFrameSize( int /*width*/, int /*height*/ ) {}
 
-#elif defined( CINDER_MSW )
+#elif defined( CINDER_MSW_DESKTOP )
 	virtual void setup( HWND wnd, HDC dc, RendererRef sharedRenderer ) = 0;
 
 	virtual void prepareToggleFullScreen() {}
@@ -101,7 +101,7 @@ class Renderer {
 
 	virtual HWND				getHwnd() = 0;
 	virtual HDC					getDc() { return NULL; }
-#elif defined( CINDER_WINRT)
+#elif defined( CINDER_UWP )
 	virtual void setup( ::Platform::Agile<Windows::UI::Core::CoreWindow> wnd, RendererRef sharedRenderer ) = 0;
 #elif defined( CINDER_ANDROID )
 	virtual void setup( ANativeWindow *nativeWindow, RendererRef sharedRenderer ) = 0;	
@@ -115,7 +115,7 @@ class Renderer {
 
 	virtual void startDraw() {}
 	virtual void finishDraw() {}
-	virtual void makeCurrentContext( bool force = false ) {}
+	virtual void makeCurrentContext( bool /*force*/ = false ) {}
 	virtual void swapBuffers() {}
 	virtual void defaultResize() {}
 
@@ -148,7 +148,7 @@ class Renderer2d : public Renderer {
 	void			makeCurrentContext( bool force = false ) override;
 	void			setFrameSize( int width, int height ) override;
 	Surface8u		copyWindowSurface( const Area &area, int32_t windowHeightPixels ) override;
-	
+
   protected:
 	Renderer2d( const Renderer2d &renderer );
 
@@ -160,7 +160,7 @@ class Renderer2d : public Renderer {
 	CGContextRef					mCGContext;
 };
 
-#elif defined( CINDER_MSW )
+#elif defined( CINDER_MSW_DESKTOP )
 
 class Renderer2d : public Renderer {
  public:

@@ -178,6 +178,10 @@ void Context::setEnabled( bool b )
 		disable();
 }
 
+void Context::connectionsDidChange( const NodeRef & /*node*/ )
+{
+}
+
 void Context::initializeAllNodes()
 {
 	set<NodeRef> traversedNodes;
@@ -442,7 +446,7 @@ string Context::printGraphToString()
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ScopedEnableContext
+// ScopedEnableContext
 // ----------------------------------------------------------------------------------------------------
 
 ScopedEnableContext::ScopedEnableContext( Context *context )

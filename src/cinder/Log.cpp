@@ -31,7 +31,7 @@
 	#include "cinder/app/cocoa/PlatformCocoa.h"
 	#import <Foundation/Foundation.h>
 	#include <syslog.h>
-#elif defined( CINDER_MSW )
+#elif defined( CINDER_MSW_DESKTOP )
 	#include <Windows.h>
 	#include <codecvt>
 #elif defined( CINDER_ANDROID )
@@ -88,7 +88,7 @@ const std::string getDailyLogString( const std::string& format )
 } // anonymous namespace
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LogManager
+// LogManager
 // ----------------------------------------------------------------------------------------------------
 
 LogManager*	LogManager::sInstance = new LogManager;	// note: leaks to enable logging during shutdown
@@ -161,7 +161,7 @@ void LogManager::write( const Metadata &meta, const std::string &text )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Entry
+// Entry
 // ----------------------------------------------------------------------------------------------------
 
 Entry::Entry( Level level, const Location &location )
@@ -183,7 +183,7 @@ void Entry::writeToLog()
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Logger
+// Logger
 // ----------------------------------------------------------------------------------------------------
 
 void Logger::writeDefault( std::ostream &stream, const Metadata &meta, const std::string &text )
@@ -197,7 +197,7 @@ void Logger::writeDefault( std::ostream &stream, const Metadata &meta, const std
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LoggerConsole
+// LoggerConsole
 // ----------------------------------------------------------------------------------------------------
 
 void LoggerConsole::write( const Metadata &meta, const string &text )
@@ -206,7 +206,7 @@ void LoggerConsole::write( const Metadata &meta, const string &text )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LoggerFile
+// LoggerFile
 // ----------------------------------------------------------------------------------------------------
 
 LoggerFile::LoggerFile( const fs::path &filePath, bool appendToExisting )
@@ -256,7 +256,7 @@ void LoggerFile::ensureDirectoryExists()
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LoggerFileRotating
+// LoggerFileRotating
 // ----------------------------------------------------------------------------------------------------
 
 LoggerFileRotating::LoggerFileRotating( const fs::path &folder, const std::string &formatStr, bool appendToExisting )
@@ -292,10 +292,10 @@ void LoggerFileRotating::write( const Metadata &meta, const string &text )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LoggerBreakpoint
+// LoggerBreakpoint
 // ----------------------------------------------------------------------------------------------------
 
-void LoggerBreakpoint::write( const Metadata &meta, const string &text )
+void LoggerBreakpoint::write( const Metadata &meta, const string & /*text*/ )
 {
 	if( meta.mLevel >= mTriggerLevel ) {
 		CI_BREAKPOINT();
@@ -305,7 +305,7 @@ void LoggerBreakpoint::write( const Metadata &meta, const string &text )
 #if defined( CINDER_COCOA ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ImplSysLog
+// ImplSysLog
 // ----------------------------------------------------------------------------------------------------
 
 class LoggerSystem::ImplSysLog : public Logger {
@@ -360,10 +360,10 @@ protected:
 	}
 };
 	
-#elif defined( CINDER_MSW )
+#elif defined( CINDER_MSW_DESKTOP )
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ImplEventLog
+// ImplEventLog
 // ----------------------------------------------------------------------------------------------------
 
 class LoggerSystem::ImplEventLog : public Logger {
@@ -440,7 +440,7 @@ protected:
 
 #if defined( CINDER_ANDROID )
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ImplLogCat
+// ImplLogCat
 // ----------------------------------------------------------------------------------------------------
 
 class LoggerSystem::ImplLogCat : public Logger {
@@ -475,7 +475,7 @@ public:
 #endif // defined ( CINDER_ANDROID )
 	
 // ----------------------------------------------------------------------------------------------------
-// MARK: - LoggerSystem
+// LoggerSystem
 // ----------------------------------------------------------------------------------------------------
 
 LoggerSystem::LoggerSystem()
@@ -483,7 +483,7 @@ LoggerSystem::LoggerSystem()
 	mMinLevel = static_cast<Level>(CI_MIN_LOG_LEVEL);
 #if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	LoggerSystem::mImpl = std::unique_ptr<ImplSysLog>( new ImplSysLog() );
-#elif defined( CINDER_MSW )
+#elif defined( CINDER_MSW_DESKTOP )
 	LoggerSystem::mImpl = std::unique_ptr<ImplEventLog>( new ImplEventLog() );
 #elif defined( CINDER_ANDROID )
 	LoggerSystem::mImpl = std::unique_ptr<ImplLogCat>( new ImplLogCat() );
@@ -496,7 +496,7 @@ LoggerSystem::~LoggerSystem()
 
 void LoggerSystem::write( const Metadata &meta, const std::string &text )
 {
-#if ! defined( CINDER_WINRT ) // Currently no system logging support on WinRT
+#if ! defined( CINDER_UWP ) // Currently no system logging support on WinRT
 	if( meta.mLevel >= mMinLevel ) {
 		mImpl->write( meta, text );
 	}
@@ -504,7 +504,7 @@ void LoggerSystem::write( const Metadata &meta, const std::string &text )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Helper Classes
+// Helper Classes
 // ----------------------------------------------------------------------------------------------------
 
 string Metadata::toString() const

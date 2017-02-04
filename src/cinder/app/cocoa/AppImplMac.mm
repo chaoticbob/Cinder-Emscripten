@@ -110,14 +110,19 @@ using namespace cinder::app;
 {
 	mApp->getRenderer()->makeCurrentContext();
 
+	// update positions for all windows, their frames might not have been correct when created.
+	for( WindowImplBasicCocoa* winIt in mWindows ) {
+		[winIt updatePosRelativeToPrimaryDisplay];
+	}
+
 	mApp->privateSetup__();
 	
-	// give all windows initial resizes
+	// call initial window resize signals
 	for( WindowImplBasicCocoa* winIt in mWindows ) {
 		[winIt->mCinderView makeCurrentContext];
 		[self setActiveWindow:winIt];
 		winIt->mWindowRef->emitResize();
-	}	
+	}
 	
 	// when available, make the first window the active window
 	[self setActiveWindow:[mWindows firstObject]];
@@ -145,6 +150,10 @@ using namespace cinder::app;
 	if( ! ((PlatformCocoa*)Platform::get())->isInsideModalLoop() ) {
 		// issue update() event
 		mApp->privateUpdate__();
+
+		// if quit() was called from update(), we don't want to issue another draw()
+		if( mApp->getQuitRequested() )
+			return;
 
 		// mark all windows as ready to draw; this really only matters the first time, to ensure the first update() fires before draw()
 		for( WindowImplBasicCocoa* winIt in mWindows ) {
@@ -348,40 +357,48 @@ using namespace cinder::app;
 	if( ! mApp->privateEmitShouldQuit() )
 		return;
 
+	mApp->setQuitRequested();
+
 	[NSApp stop:nil];
+
+	// we need to post a dummy event to force the runloop to cycle once more
+	// otherwise the app won't actually terminate until the mouse is moved or similar
+	NSEvent* event = [NSEvent otherEventWithType: NSApplicationDefined location: NSMakePoint(0,0)
+							modifierFlags: 0 timestamp: 0.0 windowNumber: 0 context: nil subtype: 0 data1: 0 data2: 0];
+	[NSApp postEvent:event atStart:YES];
 }
 
-- (void)setPowerManagementEnabled:(BOOL)flag
+- (void)setPowerManagementEnabled:(BOOL)enable
 {
-	if( flag && ![self isPowerManagementEnabled] ) {
-		CFStringRef reasonForActivity = CFSTR( "Cinder Application Execution" );
-		IOReturn status = IOPMAssertionCreateWithName( kIOPMAssertPreventUserIdleSystemSleep, kIOPMAssertionLevelOn, reasonForActivity, &mIdleSleepAssertionID );
-		if( status != kIOReturnSuccess ) {
-			CI_LOG_E( "failed to create power management assertion to prevent idle system sleep" );
-		}
+	if( enable == [self isPowerManagementEnabled] )
+		return;
 
-		status = IOPMAssertionCreateWithName( kIOPMAssertPreventUserIdleDisplaySleep, kIOPMAssertionLevelOn, reasonForActivity, &mDisplaySleepAssertionID );
-		if( status != kIOReturnSuccess ) {
+	if( ! enable ) { // do not allow sleep or screensavers
+		CFStringRef reasonForActivity = CFSTR( "Cinder Application Execution" );
+		IOReturn status = ::IOPMAssertionCreateWithName( kIOPMAssertPreventUserIdleSystemSleep, kIOPMAssertionLevelOn, reasonForActivity, &mIdleSleepAssertionID );
+		if( status != kIOReturnSuccess )
+			CI_LOG_E( "failed to create power management assertion to prevent idle system sleep" );
+
+		status = ::IOPMAssertionCreateWithName( kIOPMAssertPreventUserIdleDisplaySleep, kIOPMAssertionLevelOn, reasonForActivity, &mDisplaySleepAssertionID );
+		if( status != kIOReturnSuccess )
 			CI_LOG_E( "failed to create power management assertion to prevent idle display sleep" );
-		}
-	} else if( !flag && [self isPowerManagementEnabled] ) {
-		IOReturn status = IOPMAssertionRelease( self.idleSleepAssertionID );
-		if( status != kIOReturnSuccess ) {
+	}
+	else {
+		IOReturn status = ::IOPMAssertionRelease( self.idleSleepAssertionID );
+		if( status != kIOReturnSuccess )
 			CI_LOG_E( "failed to release and deactivate power management assertion that prevents idle system sleep" );
-		}
 		self.idleSleepAssertionID = 0;
 
-		status = IOPMAssertionRelease( self.displaySleepAssertionID );
-		if( status != kIOReturnSuccess ) {
+		status = ::IOPMAssertionRelease( self.displaySleepAssertionID );
+		if( status != kIOReturnSuccess )
 			CI_LOG_E( "failed to release and deactivate power management assertion that prevents idle display sleep" );
-		}
 		self.displaySleepAssertionID = 0;
 	}
 }
 
 - (BOOL)isPowerManagementEnabled
 {
-	return self.idleSleepAssertionID != 0 && self.displaySleepAssertionID != 0;
+	return self.idleSleepAssertionID == 0 && self.displaySleepAssertionID == 0;
 }
 
 - (float)getFrameRate
@@ -500,6 +517,13 @@ using namespace cinder::app;
 	[mWin setFrameOrigin:targetFrameRect.origin];
 }
 
+- (void)updatePosRelativeToPrimaryDisplay
+{
+	NSRect frame = [mWin frame];
+	NSRect content = [mWin contentRectForFrameRect:frame];
+	mPos = ivec2( content.origin.x, cinder::Display::getMainDisplay()->getHeight() - frame.origin.y - content.size.height );
+}
+
 - (void)close
 {
 	[mWin close];
@@ -616,15 +640,11 @@ using namespace cinder::app;
 
 - (void)windowMovedNotification:(NSNotification *)notification
 {
-	NSWindow *window = [notification object];
-
-	NSRect frame = [mWin frame];
-	NSRect content = [mWin contentRectForFrameRect:frame];
-	mPos = ivec2( content.origin.x, mWin.screen.frame.size.height - frame.origin.y - content.size.height );
+	[self updatePosRelativeToPrimaryDisplay];
 	[mAppImpl setActiveWindow:self];
 
-	// This appears to be NULL in some scenarios
-	NSScreen *screen = [window screen];
+	NSWindow *window = [notification object];
+	NSScreen *screen = [window screen]; // This appears to be NULL in some scenarios
 	if( screen ) {
 		NSDictionary *dict = [screen deviceDescription];
 		CGDirectDisplayID displayID = (CGDirectDisplayID)[[dict objectForKey:@"NSScreenNumber"] intValue];
@@ -666,11 +686,8 @@ using namespace cinder::app;
 	NSSize nsSize = [mCinderView frame].size;
 	mSize = cinder::ivec2( nsSize.width, nsSize.height );
 
-	NSRect frame = [mWin frame];
-	NSRect content = [mWin contentRectForFrameRect:frame];
-	
-	ivec2 prevPos = mPos;	
-	mPos = ivec2( content.origin.x, mWin.screen.frame.size.height - frame.origin.y - content.size.height );
+	ivec2 prevPos = mPos;
+	[self updatePosRelativeToPrimaryDisplay];
 
 	if( ! ((PlatformCocoa*)Platform::get())->isInsideModalLoop() ) {
 		[mAppImpl setActiveWindow:self];
@@ -843,7 +860,7 @@ using namespace cinder::app;
 	NSRect contentRect = [winImpl->mWin contentRectForFrameRect:[winImpl->mWin frame]];
 	winImpl->mSize.x = (int)contentRect.size.width;
 	winImpl->mSize.y = (int)contentRect.size.height;
-	winImpl->mPos = ivec2( contentRect.origin.x, Display::getMainDisplay()->getHeight() - [winImpl->mWin frame].origin.y - contentRect.size.height );
+	[winImpl updatePosRelativeToPrimaryDisplay];
 
 	[winImpl->mWin setLevel:( winImpl->mAlwaysOnTop ? NSScreenSaverWindowLevel : NSNormalWindowLevel )];
 

@@ -21,6 +21,8 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "cinder/Cinder.h"
+
 #if( _WIN32_WINNT >= 0x0600 ) // Requires Windows Vista+
 
 #include "cinder/audio/msw/DeviceManagerWasapi.h"
@@ -47,7 +49,7 @@ using namespace std;
 namespace cinder { namespace audio { namespace msw {
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - DeviceManagerWasapi
+// DeviceManagerWasapi
 // ----------------------------------------------------------------------------------------------------
 
 DeviceRef DeviceManagerWasapi::getDefaultOutput()
@@ -59,6 +61,9 @@ DeviceRef DeviceManagerWasapi::getDefaultOutput()
 
 	::IMMDevice *device;
 	hr = enumerator->GetDefaultAudioEndpoint( eRender, eConsole, &device );
+	if( hr == E_NOTFOUND ) {
+		return nullptr; // no device available
+	}
 	CI_ASSERT( hr == S_OK );
 
 	auto devicePtr = ci::msw::makeComUnique( device );
@@ -81,6 +86,9 @@ DeviceRef DeviceManagerWasapi::getDefaultInput()
 
 	::IMMDevice *device;
 	hr = enumerator->GetDefaultAudioEndpoint( eCapture, eConsole, &device );
+	if( hr == E_NOTFOUND ) {
+		return nullptr; // no device available
+	}
 	CI_ASSERT( hr == S_OK );
 
 	auto devicePtr = ci::msw::makeComUnique( device );
@@ -178,7 +186,7 @@ shared_ptr<::IMMDevice> DeviceManagerWasapi::getIMMDevice( const DeviceRef &devi
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Private
+// Private
 // ----------------------------------------------------------------------------------------------------
 
 DeviceManagerWasapi::DeviceInfo& DeviceManagerWasapi::getDeviceInfo( const DeviceRef &device )

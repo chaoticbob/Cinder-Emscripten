@@ -45,7 +45,7 @@ std::wstring toWideString( const std::string &utf8String );
 std::string toUtf8String( const std::wstring &wideString );
 
 //! Converts a Win32 POINTFX fixed point point to a cinder::vec2
-#if !defined ( CINDER_WINRT )
+#if ! defined ( CINDER_UWP )
 inline vec2 toVec2( const ::POINTFX &p )
 { return vec2( ( (p.x.value << 16) | p.x.fract ) / 65535.0f, ( (p.y.value << 16) | p.y.fract ) / 65535.0f ); }
 #endif
@@ -85,7 +85,7 @@ class ComOStream : public ::IStream
 
   // ISequentialStream Interface
   public:
-	virtual HRESULT STDMETHODCALLTYPE Read( void* pv, ULONG cb, ULONG* pcbRead ) { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE Read( void* /*pv*/, ULONG /*cb*/, ULONG* /*pcbRead*/ ) { return E_NOTIMPL; }
 	virtual HRESULT STDMETHODCALLTYPE Write( void const* pv, ULONG cb, ULONG* pcbWritten );
   // IStream Interface
   public:
@@ -97,7 +97,7 @@ class ComOStream : public ::IStream
 	virtual HRESULT STDMETHODCALLTYPE UnlockRegion( ULARGE_INTEGER, ULARGE_INTEGER, DWORD ) { return E_NOTIMPL; }
 	virtual HRESULT STDMETHODCALLTYPE Clone(IStream **) { return E_NOTIMPL; }
 	virtual HRESULT STDMETHODCALLTYPE Seek( LARGE_INTEGER liDistanceToMove, DWORD dwOrigin, ULARGE_INTEGER* lpNewFilePointer );
-	virtual HRESULT STDMETHODCALLTYPE Stat( STATSTG* pStatstg, DWORD grfStatFlag) { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE Stat( STATSTG* /*pStatstg*/, DWORD /*grfStatFlag*/) { return E_NOTIMPL; }
 
   private:
 	cinder::OStreamRef	mOStream;
@@ -117,7 +117,7 @@ public:
 	// ISequentialStream Interface
 public:
 	virtual HRESULT STDMETHODCALLTYPE Read( void* pv, ULONG cb, ULONG* pcbRead );
-	virtual HRESULT STDMETHODCALLTYPE Write( void const* pv, ULONG cb, ULONG* pcbWritten ) { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE Write( void const* /*pv*/, ULONG /*cb*/, ULONG* /*pcbWritten*/ ) { return E_NOTIMPL; }
 	// IStream Interface
 public:
 	virtual HRESULT STDMETHODCALLTYPE SetSize( ULARGE_INTEGER ) { return E_NOTIMPL; }

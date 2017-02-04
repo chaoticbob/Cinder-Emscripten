@@ -159,7 +159,7 @@ class ImageTarget : public ImageIo {
 	virtual ~ImageTarget() {};
 
 	virtual void*	getRowPointer( int32_t row ) = 0;
-	virtual void	setRow( int32_t row, const void *data ) { throw; }
+	virtual void	setRow( int32_t /*row*/, const void * /*data*/ ) { throw; }
 	virtual void	finalize() { }
 	
 	class Options {
@@ -185,7 +185,7 @@ class ImageTarget : public ImageIo {
 	ImageTarget() {}	
 };
 
-#if defined( CINDER_WINRT )
+#if defined( CINDER_UWP )
 //! Asynchronously loads an image from the file path \a path. Callback function \a callback will be called on main UI thread. Optional \a extension parameter allows specification of a file type. For example, "jpg" would force the file to load as a JPEG
 
 void loadImageAsync(const fs::path path, std::function<void (ImageSourceRef)> callback, ImageSource::Options options = ImageSource::Options(), std::string extension = "" );

@@ -34,7 +34,7 @@ using namespace ci;
 namespace cinder { namespace audio { namespace dsp {
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Windowing functions
+// Windowing functions
 // ----------------------------------------------------------------------------------------------------
 
 void generateBlackmanWindow( float *window, size_t length )
@@ -94,7 +94,7 @@ void generateWindow( WindowType windowType, float *window, size_t length )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Vector based math routines
+// Vector based math routines
 // ----------------------------------------------------------------------------------------------------
 
 #if defined( CINDER_AUDIO_VDSP )
@@ -257,6 +257,26 @@ void normalize( float *array, size_t length, float maxValue )
 	if( max > 0.00001f ) {
 		mul( array, maxValue / max, array, length );
 	}
+}
+
+float spectralCentroid( const float *magArray, size_t magArrayLength, size_t sampleRate )
+{
+	float binToFreq = (float)sampleRate / (float)(magArrayLength * 2 ); // sr / fft size
+	float FA = 0;	// f(n) * x(n)
+	float A = 0;	// x(n)
+
+	for( size_t n = 0; n < magArrayLength; n++ ) {
+		float freq = n * binToFreq;
+		float mag = magArray[n];
+
+		FA += freq * mag;
+		A += mag;
+	}
+
+	if( A < EPSILON )
+		return 0;
+
+	return FA / A;
 }
 
 } } } // namespace cinder::audio::dsp

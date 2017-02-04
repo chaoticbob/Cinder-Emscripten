@@ -32,6 +32,8 @@
 #include "cinder/ImageTargetFileWic.h"
 #include "cinder/ImageSourceFileRadiance.h"
 #include "cinder/ImageFileTinyExr.h"
+#include "cinder/ImageSourceFileStbImage.h"
+#include "cinder/ImageTargetFileStbImage.h"
 
 #include <windows.h>
 #include <Shlwapi.h>
@@ -50,6 +52,8 @@ PlatformMsw::PlatformMsw()
 	ImageSourceFileRadiance::registerSelf();
 	ImageSourceFileTinyExr::registerSelf();
 	ImageTargetFileTinyExr::registerSelf();
+	ImageSourceFileStbImage::registerSelf();
+	ImageTargetFileStbImage::registerSelf();
 }
 
 DataSourceRef PlatformMsw::loadResource( const fs::path &resourcePath, int mswID, const std::string &mswType )
@@ -198,9 +202,9 @@ class CinderStackWalker : public StackWalker {
 	CinderStackWalker()
 		: StackWalker()
 	{ ShowCallstack(); }
-	
-	virtual void OnSymInit( LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName ) {}
-	virtual void OnLoadModule( LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion ) {}
+
+	virtual void OnSymInit( LPCSTR /*szSearchPath*/, DWORD /*symOptions*/, LPCSTR /*szUserName*/ ) {}
+	virtual void OnLoadModule( LPCSTR /*img*/, LPCSTR /*mod*/, DWORD64 /*baseAddr*/, DWORD /*size*/, DWORD /*result*/, LPCSTR /*symType*/, LPCSTR /*pdbName*/, ULONGLONG /*fileVersion*/ ) {}
 	virtual void OnCallstackEntry( CallstackEntryType eType, CallstackEntry &entry )
 	{
 		CHAR buffer[STACKWALK_MAX_NAMELEN];
@@ -223,11 +227,11 @@ class CinderStackWalker : public StackWalker {
 		}
 
 	}
-	virtual void OnDbgHelpErr( LPCSTR szFuncName, DWORD gle, DWORD64 addr ) {}
-	virtual void OnOutput( LPCSTR szText ) {}
-	
+	virtual void OnDbgHelpErr( LPCSTR /*szFuncName*/, DWORD /*gle*/, DWORD64 /*addr*/ ) {}
+	virtual void OnOutput( LPCSTR /*szText*/ ) {}
+
 	const std::vector<std::string>&	getEntries() { return mEntries; }
-	
+
   protected:
 	std::vector<std::string>	mEntries;
 };
@@ -270,6 +274,7 @@ int getMonitorBitsPerPixel( HMONITOR hMonitor )
 	MONITORINFOEX mix;
 	memset( &mix, 0, sizeof( MONITORINFOEX ) );
 	mix.cbSize = sizeof( MONITORINFOEX );
+	::GetMonitorInfo(hMonitor, &mix);
 	HDC hMonitorDC = ::CreateDC( TEXT("DISPLAY"), mix.szDevice, NULL, NULL );
 	if( hMonitorDC ) {
 		result = ::GetDeviceCaps( hMonitorDC, BITSPIXEL );
@@ -299,7 +304,7 @@ std::string DisplayMsw::getName() const
 	return mName;
 }
 
-BOOL CALLBACK DisplayMsw::enumMonitorProc( HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM lParam )
+BOOL CALLBACK DisplayMsw::enumMonitorProc( HMONITOR hMonitor, HDC /*hdc*/, LPRECT rect, LPARAM lParam )
 {
 	vector<DisplayRef> *displaysVector = reinterpret_cast<vector<DisplayRef>*>( lParam );
 	

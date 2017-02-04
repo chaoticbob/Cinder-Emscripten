@@ -93,7 +93,7 @@ ImageSourceFileWic::ImageSourceFileWic( DataSourceRef dataSourceRef, ImageSource
 	
     // Create a decoder
 	IWICBitmapDecoder *decoderP = NULL;
-#if defined( CINDER_WINRT)
+#if defined( CINDER_UWP )
 		std::string s = dataSourceRef->getFilePath().string();
 		std::wstring filePath =	std::wstring(s.begin(), s.end());                 
 #else
@@ -205,6 +205,9 @@ bool ImageSourceFileWic::processFormat( const ::GUID &guid, ::GUID *convertGUID 
 	}
 	else if( guid == GUID_WICPixelFormat32bppGrayFloat ) {
 		setChannelOrder( ImageIo::Y ); setColorModel( ImageIo::CM_GRAY ); setDataType( ImageIo::FLOAT32 );
+	}
+	else if( guid == GUID_WICPixelFormat32bppCMYK || guid == GUID_WICPixelFormat64bppCMYK || guid == GUID_WICPixelFormat40bppCMYKAlpha || guid == GUID_WICPixelFormat80bppCMYKAlpha ) {
+		throw ImageIoExceptionIllegalColorModel( "CMYK pixel format not supported." );
 	}
 	else
 		throw ImageIoException( "Unsupported format." );

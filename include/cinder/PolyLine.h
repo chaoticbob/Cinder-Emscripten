@@ -31,7 +31,7 @@ template<typename T>
 class PolyLineT {
   public:
 	PolyLineT() : mClosed( false ) {}
-	PolyLineT( const std::vector<T> &aPoints ) : mPoints( aPoints ), mClosed( false ) {}
+	PolyLineT( const std::vector<T> &aPoints, bool closed = false ) : mPoints( aPoints ), mClosed( closed ) {}
 	
 	const std::vector<T>&	getPoints() const { return mPoints; }
 	std::vector<T>&			getPoints() { return mPoints; }
@@ -51,13 +51,19 @@ class PolyLineT {
 	void				setClosed( bool aClosed = true ) { mClosed = aClosed; }
 	bool				isClosed() const { return mClosed; }
 
+	//! Returns \c true if PolyLine is clockwise-oriented. If \a isColinear is non-null, it receives \c true if all points are colinear
+	bool  isClockwise( bool *isColinear = nullptr ) const;
+	//! Returns \c true if PolyLine is counterclockwise-oriented. If \a isColinear is non-null, it receives \c true if all points are colinear
+	bool  isCounterclockwise( bool *isColinear = nullptr ) const;
+
 	T			getPosition( float t ) const;
 	T			getDerivative( float t ) const;
 
-	void		scale( const T &scaleFactor, T scaleCenter = T() );
-	void		offset( const T &offsetBy );
-	void		reverse();
-	
+	void			scale( const T &scaleFactor, T scaleCenter = T() );
+	PolyLineT<T>	scaled( const T &scaleFactor, T scaleCenter = T() ) const;
+	void			offset( const T &offsetBy );
+	PolyLineT<T>	getOffset( const T &offsetBy ) const;
+	void			reverse();
 	PolyLineT<T>	reversed() const;
 
 	//! Returns whether the point \a pt is contained within the boundaries of the PolyLine
@@ -93,8 +99,5 @@ class PolyLineT {
 typedef PolyLineT<vec2>		PolyLine2;
 typedef PolyLineT<vec2>		PolyLine2f;
 typedef PolyLineT<dvec2>	PolyLine2d;
-typedef PolyLineT<vec3>		PolyLine3;
-typedef PolyLineT<vec3>		PolyLine3f;
-typedef PolyLineT<dvec3>	PolyLine3d;
 
 } // namespace cinder

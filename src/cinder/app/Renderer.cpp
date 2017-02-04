@@ -23,7 +23,7 @@
 
 #include "cinder/app/Renderer.h"
 
-#if !defined( CINDER_WINRT)
+#if !defined( CINDER_UWP )
 	#include "cinder/gl/platform.h"
 #endif
 
@@ -40,9 +40,9 @@
 		#import "cinder/app/cocoa/RendererImpl2dCocoaTouchQuartz.h"		
 	#endif
 
-#elif defined( CINDER_MSW )
-	#include "cinder/app/AppImplMsw.h"
-	#include "cinder/app/AppImplMswRendererGdi.h"
+#elif defined( CINDER_MSW_DESKTOP )
+	#include "cinder/app/msw/AppImplMsw.h"
+	#include "cinder/app/msw/RendererImpl2dGdi.h"
 #elif defined( CINDER_ANDROID )
     #include "cinder/app/android/Renderer2dAndroid.h"
 #endif
@@ -51,7 +51,7 @@ namespace cinder { namespace app {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Renderer
-Renderer::Renderer( const Renderer &renderer )
+Renderer::Renderer( const Renderer & /*renderer*/ )
 {
 }
 
@@ -141,7 +141,7 @@ Surface Renderer2d::copyWindowSurface( const Area &area, int32_t windowHeightPix
 }
 #endif
 
-#if defined( CINDER_MSW )
+#if defined( CINDER_MSW_DESKTOP )
 
 Renderer2d::Renderer2d( const Renderer2d &renderer )
 	: Renderer( renderer )
@@ -197,11 +197,11 @@ void Renderer2d::defaultResize()
 	mImpl->defaultResize();
 }
 
-Surface	Renderer2d::copyWindowSurface( const Area &area, int32_t windowHeightPixels )
+Surface	Renderer2d::copyWindowSurface( const Area &area, int32_t /*windowHeightPixels*/ )
 {
 	return mImpl->copyWindowContents( area );
 }
 
-#endif // defined( CINDER_MSW )
+#endif // defined( CINDER_MSW_DESKTOP )
 
 } } // namespace cinder::app

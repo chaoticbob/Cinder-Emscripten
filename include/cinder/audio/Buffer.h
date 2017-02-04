@@ -237,8 +237,12 @@ class BufferDynamicT : public BufferTT {
 	//! Shrinks the allocated size to match the specified size, freeing any extra memory.
 	void shrinkToFit()
 	{
-		mAllocatedSize = this->getSize();
-		this->mData.resize( mAllocatedSize );
+		size_t size = this->getSize();
+		if ( mAllocatedSize > size ) {
+			mAllocatedSize = size;
+			this->mData.resize( mAllocatedSize );
+			this->mData.shrink_to_fit();
+		}
 	}
 
 	//! Returns the number of samples allocated in this buffer (may be larger than getSize()).
@@ -273,6 +277,7 @@ std::unique_ptr<T, FreeDeleter<T> > makeAlignedArray( size_t size, size_t alignm
 	// unnecessary at the moment anyway, so it is commented out until fixed
 	//ptr = std::align( alignment, size, ptr, size );
 	//CI_ASSERT( ptr );
+	(void)alignment;
 	
 	return std::unique_ptr<T, FreeDeleter<T> >( static_cast<T *>( ptr ) );
 }

@@ -175,9 +175,9 @@ Fbo::Format::Format()
 GLint Fbo::Format::getDefaultColorInternalFormat( bool alpha )
 {
 #if defined( CINDER_GL_ES_2 )
-	return GL_RGBA;
+	return alpha ? GL_RGBA : GL_RGB;
 #else
-	return GL_RGBA8;
+	return alpha ? GL_RGBA8 : GL_RGB8;
 #endif
 }
 
@@ -324,7 +324,8 @@ void Fbo::initMultisamplingSettings( bool *useMsaa, bool *useCsaa, Format *forma
 }
 
 // Iterate the Format's requested attachments and create any we don't already have attachments for
-void Fbo::prepareAttachments( const Fbo::Format &format, bool multisampling )
+// TODO: handle multisampling
+void Fbo::prepareAttachments( const Fbo::Format &format, bool /*multisampling*/ )
 {
 	mAttachmentsBuffer = format.mAttachmentsBuffer;
 	mAttachmentsTexture = format.mAttachmentsTexture;
@@ -343,7 +344,11 @@ void Fbo::prepareAttachments( const Fbo::Format &format, bool multisampling )
 										|| mAttachmentsTexture.count( GL_DEPTH_STENCIL_ATTACHMENT ) || mAttachmentsBuffer.count( GL_DEPTH_STENCIL_ATTACHMENT );
 #endif
 	if( format.mDepthTexture && ( ! preexistingDepthAttachment ) ) {
+#if ! defined( CINDER_LINUX_EGL_RPI2 )
 		mAttachmentsTexture[GL_DEPTH_ATTACHMENT] = Texture::create( mWidth, mHeight, format.mDepthTextureFormat );
+#else
+		CI_LOG_W( "No depth texture support on the RPi2." );
+#endif
 	}
 	else if( format.mDepthBuffer && ( ! preexistingDepthAttachment ) ) {
 		if( format.mStencilBuffer ) {
@@ -378,10 +383,16 @@ void Fbo::attachAttachments()
 	
 	// attach Textures
 	for( auto &textureAttachment : mAttachmentsTexture ) {
-#if ! defined( CINDER_GL_ES )
-		glFramebufferTexture( GL_FRAMEBUFFER, textureAttachment.first, textureAttachment.second->getId(), 0 );
-#else
 		auto textureTarget = textureAttachment.second->getTarget();
+#if ! defined( CINDER_GL_ES )
+		if( textureTarget == GL_TEXTURE_CUBE_MAP ) {
+			textureTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+			glFramebufferTexture2D( GL_FRAMEBUFFER, textureAttachment.first, textureTarget, textureAttachment.second->getId(), 0 );
+		}
+		else {
+			glFramebufferTexture( GL_FRAMEBUFFER, textureAttachment.first, textureAttachment.second->getId(), 0 );
+		}
+#else
 		if( textureTarget == GL_TEXTURE_CUBE_MAP ) {
 			textureTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 		}

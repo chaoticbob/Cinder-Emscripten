@@ -48,10 +48,10 @@ void ImageSourceFileRadiance::registerSelf()
 	ImageIoRegistrar::registerSourceType( "hdr", sourceFunc, 1 );
 }
 
-ImageSourceFileRadiance::ImageSourceFileRadiance( DataSourceRef dataSourceRef, ImageSource::Options options )
+ImageSourceFileRadiance::ImageSourceFileRadiance( DataSourceRef dataSourceRef, ImageSource::Options /*options*/ )
 {
 	IStreamRef stream = dataSourceRef->createStream();
-	
+
 	loadStream( stream );
 }
 
@@ -102,7 +102,7 @@ void ImageSourceFileRadiance::loadStream( IStreamRef stream )
 	}
 
 	int width, height;
-#if defined( CINDER_WINRT )
+#if defined( CINDER_UWP )
 	if( ! sscanf_s( resolution, "-Y %d +X %d", &height, &width ) )
 #else
 	if( ! sscanf( resolution, "-Y %d +X %d", &height, &width ) )

@@ -53,7 +53,7 @@ SurfaceChannelOrder SurfaceConstraintsCairo::getChannelOrder( bool alpha ) const
 	return ( alpha ) ? SurfaceChannelOrder::BGRA : SurfaceChannelOrder::BGRX;
 }
 
-int32_t	SurfaceConstraintsCairo::getRowBytes( int requestedWidth, const SurfaceChannelOrder &sco, int elementSize ) const {
+ptrdiff_t SurfaceConstraintsCairo::getRowBytes( int requestedWidth, const SurfaceChannelOrder &sco, int elementSize ) const {
 	return cairo_format_stride_for_width( sco.hasAlpha() ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24, requestedWidth );
 }
 
@@ -2100,7 +2100,7 @@ class SvgRendererCairo : public svg::Renderer {
 	}
 	
 	void	pushStyle( const svg::Style &style ) {}	
-	void	popStyle( const svg::Style &style ) {}
+	void	popStyle() {}
 	
 	void	pushStroke( const svg::Paint &paint ) { mStrokeStack.push_back( paint ); }
 	void	popStroke() { mStrokeStack.pop_back(); }

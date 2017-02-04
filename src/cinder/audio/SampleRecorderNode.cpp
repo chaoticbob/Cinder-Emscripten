@@ -74,7 +74,7 @@ void resizeBufferAndShuffleChannels( BufferDynamic *buffer, size_t resultNumFram
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - SampleRecorderNode
+// SampleRecorderNode
 // ----------------------------------------------------------------------------------------------------
 
 SampleRecorderNode::SampleRecorderNode( const Format &format )
@@ -83,7 +83,7 @@ SampleRecorderNode::SampleRecorderNode( const Format &format )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - BufferRecorderNode
+// BufferRecorderNode
 // ----------------------------------------------------------------------------------------------------
 
 BufferRecorderNode::BufferRecorderNode( const Format &format )
@@ -180,7 +180,7 @@ uint64_t BufferRecorderNode::getLastOverrun()
 
 void BufferRecorderNode::process( Buffer *buffer )
 {
-	const size_t writePos = mWritePos;
+	size_t writePos = mWritePos;
 	size_t numWriteFrames = buffer->getNumFrames();
 
 	if( writePos + numWriteFrames > mRecorderBuffer.getNumFrames() )
@@ -191,7 +191,10 @@ void BufferRecorderNode::process( Buffer *buffer )
 	if( numWriteFrames < buffer->getNumFrames() )
 		mLastOverrun = getContext()->getNumProcessedFrames();
 
-	mWritePos += numWriteFrames;
+	const size_t writePosNew = writePos + numWriteFrames;
+
+	// only update mWritePos if it hasn't been reset by start() in the meanwhile
+	mWritePos.compare_exchange_strong( writePos, writePosNew );
 }
 
 } } // namespace cinder::audio

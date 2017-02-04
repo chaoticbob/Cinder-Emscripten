@@ -39,7 +39,7 @@
 #include "cinder/Exception.h"
 
 //! Convenience macro that allows one to embed raw glsl code in-line. The \a VERSION parameter will be used for the glsl's '#version' define.
-//! \note Some strings will confuse different compilers, most commonly being preprocessor derictives (hence the need for \a VERSION to be a pamaeter).
+//! \note Some strings will confuse different compilers, most commonly being preprocessor directives (hence the need for \a VERSION to be a parameter).
 //! If available on all target platforms, users should use C+11 raw string literals, which do not suffer from the same limitations.
 #define CI_GLSL(VERSION,CODE) "#version " #VERSION "\n" #CODE
 
@@ -137,7 +137,8 @@ class GlslProg {
 		
 	  private:
 		std::string				mName;
-		GLint					mDataSize = 0, mLoc = -1, mBlockBinding;
+		GLint					mDataSize = 0, mLoc = -1;
+		mutable GLint			mBlockBinding;
 		std::vector<Uniform>	mActiveUniforms;
 		std::map<GLenum, std::vector<GLint>> mActiveUniformInfo;
 		
@@ -443,9 +444,9 @@ class GlslProg {
 
 #if defined( CINDER_GL_HAS_UNIFORM_BLOCKS )
 	//! Analogous to glUniformBlockBinding()
-	void	uniformBlock( const std::string &name, GLint binding );
+	void	uniformBlock( const std::string &name, GLint binding ) const;
 	//! Analogous to glUniformBlockBinding()
-	void	uniformBlock( GLint loc, GLint binding );
+	void	uniformBlock( GLint loc, GLint binding ) const;
 	//!	Returns the uniform block location of the Uniform Block that matches \a name.
 	GLint	getUniformBlockLocation( const std::string &name ) const;
 	//! Returns the size of the Uniform block matching \a blockIndex.

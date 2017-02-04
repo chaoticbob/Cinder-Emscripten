@@ -31,7 +31,7 @@ using namespace std;
 namespace cinder {
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ImageSourceFileTinyExr
+// ImageSourceFileTinyExr
 // ----------------------------------------------------------------------------------------------------
 
 ImageSourceRef ImageSourceFileTinyExr::create( DataSourceRef dataSourceRef, ImageSource::Options options )
@@ -45,7 +45,7 @@ void ImageSourceFileTinyExr::registerSelf()
 	ImageIoRegistrar::registerSourceType( "exr", sourceFunc, 1 ); // lower is higher priority
 }
 
-ImageSourceFileTinyExr::ImageSourceFileTinyExr( DataSourceRef dataSource, ImageSource::Options options )
+ImageSourceFileTinyExr::ImageSourceFileTinyExr( DataSourceRef dataSource, ImageSource::Options /*options*/ )
 {
 	mExrImage.reset( new EXRImage );
 	const char *error;
@@ -162,7 +162,7 @@ void ImageSourceFileTinyExr::load( ImageTargetRef target )
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - ImageTargetFileTinyExr
+// ImageTargetFileTinyExr
 // ----------------------------------------------------------------------------------------------------
 
 void ImageTargetFileTinyExr::registerSelf()
@@ -184,7 +184,7 @@ ImageTargetRef ImageTargetFileTinyExr::create( DataTargetRef dataTarget, ImageSo
 	return ImageTargetRef( new ImageTargetFileTinyExr( dataTarget, imageSource, options, extensionData ) );
 }
 
-ImageTargetFileTinyExr::ImageTargetFileTinyExr( DataTargetRef dataTarget, ImageSourceRef imageSource, ImageTarget::Options options, const std::string &extensionData )
+ImageTargetFileTinyExr::ImageTargetFileTinyExr( DataTargetRef dataTarget, ImageSourceRef imageSource, ImageTarget::Options options, const std::string & /*extensionData*/ )
 {
 	if( ! dataTarget->providesFilePath() ) {
 		throw ImageIoExceptionFailedWrite( "ImageTargetFileTinyExr only supports writing to files." );

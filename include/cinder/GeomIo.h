@@ -793,6 +793,8 @@ class ExtrudeSpline : public Source {
 	ExtrudeSpline&		backCap( bool cap ) { mBackCap = cap; return *this; }
 	//! Sets the number of subdivisions along the axis of extrusion
 	ExtrudeSpline&		subdivisions( int sub ) { mSubdivisions = std::max<int>( 1, sub ); updatePathSubdivision(); return *this; }
+	//! Sets the function used to calculate the width of the Shape2d at each subdivision
+	ExtrudeSpline&		thickness( const std::function<float(float)> &fn ) { mThicknessFn = fn; return *this; }
 
 	size_t			getNumVertices() const override;
 	size_t			getNumIndices() const override;
@@ -809,13 +811,15 @@ class ExtrudeSpline : public Source {
 	std::vector<Path2d>				mPaths;
 	std::vector<mat4>				mSplineFrames;
 	std::vector<float>				mSplineTimes;
-	float							mApproximationScale;
+	float							mApproximationScale, mSplineLength;
 	bool							mFrontCap, mBackCap;
 	int								mSubdivisions;
 	std::shared_ptr<TriMesh>		mCap;
 	Rectf							mCapBounds;
-
+	std::function<float(float)>		mThicknessFn;
+	
 	std::vector<std::vector<vec2>>	mPathSubdivisionPositions, mPathSubdivisionTangents;
+	std::vector<float>				mPathSubdivisionLengths;
 };
 
 //! Converts a BSpline into a \c LINE_STRIP
@@ -939,6 +943,22 @@ class WireRoundedRect : public WireSource {
 	Rectf						mRectPositions;
 	int							mCornerSubdivisions, mNumVertices;
 	float						mCornerRadius;
+};
+
+class WireRect : public WireSource {
+  public:
+  	WireRect();
+  	WireRect( const Rectf &r );
+
+  	WireRect& 			rect( const Rectf &r );
+
+  	size_t 				getNumVertices() const override { return 5; }
+	Primitive			getPrimitive() const override { return geom::LINE_STRIP; }
+  	void 				loadInto( Target *target, const AttribSet &requestedAttribs ) const override;
+  	WireRect* 			clone() const override { return new WireRect( *this ); };
+
+  protected:
+  	std::array<vec2, 5> mPositions;
 };
 
 class WireCube : public WireSource {
@@ -1227,11 +1247,11 @@ class Twist : public Modifier {
 class Lines : public Modifier {
   public:
 	Modifier*	clone() const override { return new Lines(); }
-	
+
 	size_t		getNumIndices( const Modifier::Params &upstreamParams ) const override;
-	Primitive	getPrimitive( const Modifier::Params &upstreamParams ) const override { return geom::LINES; }
+	Primitive	getPrimitive( const Modifier::Params &/*upstreamParams*/ ) const override { return geom::LINES; }
 	void		process( SourceModsContext *ctx, const AttribSet &requestedAttribs ) const override;
-	
+
   protected:
 	static size_t	calcNumIndices( Primitive primitive, size_t upstreamNumIndices, size_t upstreamNumVertices );
 };
@@ -1268,7 +1288,7 @@ class ColorFromAttrib : public Modifier {
 //! Sets an attribute of a geom::Source to be a constant value for every vertex. Determines dimension from constructor (vec4 -> 4, for example)
 class Constant : public Modifier {
   public:
-	Constant( geom::Attrib attrib, float &v )
+	Constant( geom::Attrib attrib, float v )
 		: mAttrib( attrib ), mValue( v, 0, 0, 0 ), mDims( 1 ) {}
 	Constant( geom::Attrib attrib, const vec2 &v )
 		: mAttrib( attrib ), mValue( v, 0, 0 ), mDims( 2 ) {}
@@ -1324,14 +1344,14 @@ class VertexNormalLines : public Modifier {
 	VertexNormalLines&	length( float len ) { mLength = len; return *this; }
 
 	size_t		getNumVertices( const Modifier::Params &upstreamParams ) const override;
-	size_t		getNumIndices( const Modifier::Params &upstreamParams ) const override				{ return 0; }
-	Primitive	getPrimitive( const Modifier::Params &upstreamParams ) const override				{ return geom::LINES; }
+	size_t		getNumIndices( const Modifier::Params &/*upstreamParams*/ ) const override				{ return 0; }
+	Primitive	getPrimitive( const Modifier::Params &/*upstreamParams*/ ) const override				{ return geom::LINES; }
 	uint8_t		getAttribDims( Attrib attr, uint8_t upstreamDims ) const override;
 	AttribSet	getAvailableAttribs( const Modifier::Params &upstreamParams ) const override;
-	
+
 	Modifier*	clone() const override { return new VertexNormalLines( mLength, mAttrib ); }
 	void		process( SourceModsContext *ctx, const AttribSet &requestedAttribs ) const override;
-	
+
   protected:
 	float					mLength;
 	Attrib					mAttrib;

@@ -268,10 +268,10 @@ GlslProg::Format& GlslProg::Format::compute( const string &computeShader )
 void GlslProg::Format::setShaderSource( const DataSourceRef &dataSource, string *shaderSourceDest, fs::path *shaderPathDest )
 {
 	if( dataSource ) {
-		Buffer buffer( dataSource );
-		shaderSourceDest->resize( buffer.getSize() + 1 );
-		memcpy( (void *)shaderSourceDest->data(), buffer.getData(), buffer.getSize() );
-		(*shaderSourceDest)[buffer.getSize()] = 0;
+		auto buffer = dataSource->getBuffer();
+		const char *data = static_cast<const char *>( buffer->getData() );
+		*shaderSourceDest = string( data, data + buffer->getSize() );
+
 		if( dataSource->isFilePath() )
 			*shaderPathDest = dataSource->getFilePath();
 		else
@@ -1042,7 +1042,9 @@ const GlslProg::Uniform* GlslProg::findUniform( const std::string &name, int *re
 	// first check if there is an exact name match with mUniforms and simply return it if we find one
 	for( const auto & uniform : mUniforms ) {
 		if( uniform.mName == name ) {
-			*resultLocation = uniform.mLoc;
+			if( resultLocation ) {
+				*resultLocation = uniform.mLoc;
+			}
 			return &uniform;
 		}
 	}
@@ -1090,7 +1092,7 @@ const GlslProg::Uniform* GlslProg::findUniform( const std::string &name, int *re
 		}
 	}
 
-	if( resultUniform ) {
+	if( resultLocation && resultUniform ) {
 		if( needsLocationOffset ) {
 			CI_ASSERT( requestedNameLeftSquareBracket != string::npos && requestedNameRightSquareBracket != string::npos );
 
@@ -1100,7 +1102,7 @@ const GlslProg::Uniform* GlslProg::findUniform( const std::string &name, int *re
 				string indexStr = name.substr( requestedNameLeftSquareBracket + 1, requestedNameRightSquareBracket - requestedNameLeftSquareBracket - 1 );
 				*resultLocation = resultUniform->mLoc + stoi( indexStr );
 			}
-			catch( std::logic_error &exc ) {
+			catch( std::logic_error & ) {
 				return nullptr;
 			}
 		}
@@ -1185,7 +1187,7 @@ const GlslProg::UniformBlock* GlslProg::findUniformBlock( const std::string &nam
 	return ret;
 }
 
-void GlslProg::uniformBlock( int loc, int binding )
+void GlslProg::uniformBlock( int loc, int binding ) const
 {
 	auto found = find_if( mUniformBlocks.begin(), mUniformBlocks.end(),
 						 [loc]( const UniformBlock &block ) {
@@ -1203,7 +1205,7 @@ void GlslProg::uniformBlock( int loc, int binding )
 	}
 }
 
-void GlslProg::uniformBlock( const std::string &name, GLint binding )
+void GlslProg::uniformBlock( const std::string &name, GLint binding ) const
 {
 	auto found = findUniformBlock( name );
 	if( found ) {
