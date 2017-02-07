@@ -107,7 +107,7 @@ uint8_t	VboMeshGeomTarget::getAttribDims( geom::Attrib attr ) const
 	return mVboMesh->getAttribDims( attr );
 }
 
-void VboMeshGeomTarget::copyAttrib( geom::Attrib attr, uint8_t dims, size_t strideBytes, const float *srcData, size_t count )
+void VboMeshGeomTarget::copyAttrib( geom::Attrib attr, uint8_t dims, size_t /*strideBytes*/, const float *srcData, size_t count )
 {
 	// if we don't have it we don't want it
 	if( getAttribDims( attr ) == 0 )
@@ -146,7 +146,7 @@ void VboMeshGeomTarget::copyAttrib( geom::Attrib attr, uint8_t dims, size_t stri
 		geom::copyData( dims, srcData, count, dstDims, dstStride, reinterpret_cast<float*>( dstData ) );
 }
 
-void VboMeshGeomTarget::copyIndices( geom::Primitive primitive, const uint32_t *source, size_t numIndices, uint8_t requiredBytesPerIndex )
+void VboMeshGeomTarget::copyIndices( geom::Primitive /*primitive*/, const uint32_t *source, size_t numIndices, uint8_t requiredBytesPerIndex )
 {
 // @TODO: Find a better way to handle this
 #if defined( CINDER_GL_ES_2 )
@@ -157,8 +157,10 @@ void VboMeshGeomTarget::copyIndices( geom::Primitive primitive, const uint32_t *
 #endif
 
 	mVboMesh->mNumIndices = (uint32_t)numIndices;
-
-	if( requiredBytesPerIndex <= 2 ) {
+	if( mVboMesh->mNumIndices == 0 ) {
+		mVboMesh->mIndices.reset();
+	}
+	else if( requiredBytesPerIndex <= 2 ) {
 		mVboMesh->mIndexType = GL_UNSIGNED_SHORT;
 		std::unique_ptr<uint16_t[]> indices( new uint16_t[numIndices] );
 		copyIndexData( source, numIndices, indices.get() );
@@ -505,7 +507,7 @@ void VboMesh::buildVao( const GlslProg* shader, const AttribGlslMap &attributeMa
 
 void VboMesh::drawImpl( GLint first, GLsizei count )
 {
-	if( mNumIndices ) {
+	if( mIndices ) {
 		size_t firstByteOffset = first;
 		if( mIndexType == GL_UNSIGNED_INT ) firstByteOffset *= 4;
 		else if( mIndexType == GL_UNSIGNED_SHORT ) firstByteOffset *= 2;
@@ -519,12 +521,23 @@ void VboMesh::drawImpl( GLint first, GLsizei count )
 void VboMesh::drawInstancedImpl( GLsizei instanceCount )
 {
 	auto ctx = gl::context();
-	if( mNumIndices )
+	if( mIndices )
 		ctx->drawElementsInstanced( mGlPrimitive, mNumIndices, mIndexType, (GLvoid*)( 0 ), instanceCount );
 	else
 		ctx->drawArraysInstanced( mGlPrimitive, 0, mNumVertices, instanceCount );
 }
 #endif // defined( CINDER_GL_HAS_DRAW_INSTANCED )
+
+#if defined( CINDER_GL_HAS_DRAW_INDIRECT )
+void VboMesh::drawIndirectImpl( const GLvoid *indirect )
+{
+	auto ctx = gl::context();
+	if( mNumIndices )
+		ctx->drawElementsIndirect( mGlPrimitive, mIndexType, indirect );
+	else
+		ctx->drawArraysIndirect( mGlPrimitive, indirect );
+}
+#endif // defined( CINDER_GL_HAS_DRAW_INDIRECT )
 
 std::pair<geom::BufferLayout,VboRef>* VboMesh::findAttrib( geom::Attrib attr )
 {
@@ -924,7 +937,7 @@ std::shared_ptr<VboMeshSource> VboMeshSource::create( const gl::VboMesh *vboMesh
 	return std::shared_ptr<VboMeshSource>( new VboMeshSource( vboMesh ) );
 }
 
-void VboMeshSource::loadInto( geom::Target *target, const geom::AttribSet &requestedAttribs ) const
+void VboMeshSource::loadInto( geom::Target *target, const geom::AttribSet & /*requestedAttribs*/ ) const
 {
 	// iterate all the vertex array VBOs; map<geom::BufferLayout,VboRef>
 	for( const auto &vertArrayVbo : mVboMesh->getVertexArrayLayoutVbos() ) {

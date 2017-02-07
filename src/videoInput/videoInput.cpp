@@ -27,6 +27,14 @@
 //for threading
 #include <process.h>
 
+#if defined( __clang__ ) || defined( __GCC__ )
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif defined( _MSC_VER )
+    #pragma warning( push )
+    #pragma warning( disable : 4100)
+#endif
+
 // Due to a missing qedit.h in recent Platform SDKs, we've replicated the relevant contents here
 // #include <qedit.h>
 MIDL_INTERFACE("0579154A-2B53-4994-B0D0-E773148EFF85")
@@ -330,10 +338,9 @@ void videoDevice::NukeDownstream(IBaseFilter *pBF){
 
 void videoDevice::destroyGraph(){
 	HRESULT hr = NULL;
- 	int FuncRetval=0;
- 	int NumFilters=0;
+	int FuncRetval=0;
+	int NumFilters=0;
 
-	int i = 0;
 	while (hr == NOERROR)	
 	{
 		IEnumFilters * pEnum = 0;
@@ -351,31 +358,18 @@ void videoDevice::destroyGraph(){
 			hr = pFilter->QueryFilterInfo(&FilterInfo);
 			FilterInfo.pGraph->Release();
 
-			int count = 0;
-			WCHAR buffer[255];
-			memset(buffer, 0, 255 * sizeof(WCHAR));
-						
-			while( FilterInfo.achName[count] != 0x00 ) 
-			{
-				buffer[count] = FilterInfo.achName[count];
-				count++;
-			}
-			
-			if(verbose)printf("SETUP: removing filter %S...\n", buffer);
+			if(verbose)printf("SETUP: removing filter %S...\n", FilterInfo.achName);
 			hr = pGraph->RemoveFilter(pFilter);
 			if (FAILED(hr)) { if(verbose)printf("SETUP: pGraph->RemoveFilter() failed. \n"); return; }
-			if(verbose)printf("SETUP: filter removed %s  \n",buffer);
-			
+			if(verbose)printf("SETUP: filter removed %S  \n", FilterInfo.achName);
+
 			pFilter->Release();
 			pFilter = NULL;
 		}
 		else break;
 		pEnum->Release();
 		pEnum = NULL;
-		i++;
 	}
-
- return;
 }
 
 
@@ -2428,4 +2422,10 @@ HRESULT videoInput::routeCrossbar(ICaptureGraphBuilder2 **ppBuild, IBaseFilter *
 	
 	return hr;
 }
-   
+
+#if defined( __clang__ ) || defined( __GCC__ )
+    #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+    #pragma warning(pop)
+#endif
+

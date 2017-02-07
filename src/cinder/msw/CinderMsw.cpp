@@ -30,7 +30,7 @@
 
 namespace cinder { namespace msw {
 
-#if !defined( CINDER_WINRT )
+#if ! defined( CINDER_UWP )
 Surface8uRef convertHBitmap( HBITMAP hbitmap )
 {
 	// create a temporary DC
@@ -246,7 +246,7 @@ HRESULT STDMETHODCALLTYPE ComIStream::Seek( LARGE_INTEGER liDistanceToMove, DWOR
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE ComIStream::Stat( STATSTG* pStatstg, DWORD grfStatFlag)
+HRESULT STDMETHODCALLTYPE ComIStream::Stat( STATSTG* pStatstg, DWORD /*grfStatFlag*/)
 {
 	pStatstg->pwcsName = NULL;
 	pStatstg->cbSize.QuadPart = (ULONGLONG)mIStream->size();
@@ -268,7 +268,7 @@ struct ComInitializer {
 	}
 };
 
-#if defined( CINDER_WINRT )
+#if defined( CINDER_UWP )
 
 void initializeCom( DWORD params )
 {

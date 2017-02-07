@@ -169,6 +169,8 @@ class AppBase {
 
 		//! Returns the command line args passed to the application from its entry point (ex. a main's argc / argv).
 		const std::vector<std::string>&	getCommandLineArgs() const	{ return mCommandLineArgs; }
+		//! Primarily for internal use. Replaces the command line args.
+		void							setCommandLineArgs( const std::vector<std::string> &commandLineArgs ) { mCommandLineArgs = commandLineArgs; }
 
 		//!	Set this to true if the app should terminate prior to launching.
 		void	setShouldQuit( bool shouldQuit = true );
@@ -235,7 +237,7 @@ class AppBase {
 	
 	//! Override to cleanup any resources before app destruction
 	virtual void	cleanup() {}
-	//! Requests that the application exit gracefully. Use std::terminate() instead to end application immediately.
+	//! Requests that the application exit gracefully upon completion of the current event loop. Use std::terminate() instead to end application immediately.
 	virtual void	quit() = 0;
 
 	//! Emitted at the start of each application update cycle
@@ -357,7 +359,7 @@ class AppBase {
 	bool				isHighDensityDisplayEnabled() const		{ return mHighDensityDisplayEnabled; }
 
 	// utilities
-#if defined( CINDER_MSW )
+#if defined( CINDER_MSW_DESKTOP )
 	//! Returns a DataSourceRef to an application resource. \a mswID and \a mswType identify the resource as defined the application's .rc file(s). \sa \ref CinderResources
 	DataSourceRef		loadResource( const fs::path &resourcePath, int mswID, const std::string &mswType ) const { return Platform::get()->loadResource( resourcePath, mswID, mswType ); }
 #else
@@ -420,6 +422,9 @@ class AppBase {
 	// DO NOT CALL - should be private but aren't for esoteric reasons
 	//! \cond
 	// Internal handlers - these are called into by AppImpl's. If you are calling one of these, you have likely strayed far off the path.
+	//! Returns whether a call to quit() has been issued
+	bool			getQuitRequested() const { return mQuitRequested; }
+	void			setQuitRequested() { mQuitRequested = true; }	
 	virtual void	privateSetup__();
 	virtual void	privateUpdate__();
 	bool			privateEmitShouldQuit()		{ return mSignalShouldQuit.emit(); }
@@ -453,6 +458,7 @@ class AppBase {
 	double					mFpsLastSampleTime;
 	double					mFpsSampleInterval;
 	bool					mMultiTouchEnabled, mHighDensityDisplayEnabled;
+	bool					mLaunchCalled, mQuitRequested;
 	RendererRef				mDefaultRenderer;
 
 	std::vector<std::string>	mCommandLineArgs;
@@ -469,6 +475,8 @@ class AppBase {
   protected:
 	static AppBase*			sInstance;
 	static Settings*		sSettingsFromMain;
+
+	bool					getLaunchCalled() const { return mLaunchCalled; }
 
 	bool					mPowerManagement;
 };
@@ -546,7 +554,7 @@ inline uint32_t	getElapsedFrames()	{ return AppBase::get()->getElapsedFrames(); 
 //! Returns \c true if the calling thread is the Application's main thread (the thread running the main function), false otherwise.
 inline bool		isMainThread()		{ return AppBase::isMainThread(); }
 
-#if defined( CINDER_MSW )
+#if defined( CINDER_MSW_DESKTOP )
 //! (MSW only) Returns a DataSource to an application resource. \a mswID and \a mswType identify the resource as defined the application's .rc file(s). \sa \ref CinderResources
 inline DataSourceRef	loadResource( const fs::path &resourcePath, int mswID, const std::string &mswType ) { return Platform::get()->loadResource( resourcePath, mswID, mswType ); }
 #else
@@ -555,13 +563,17 @@ inline DataSourceRef	loadResource( const fs::path &resourcePath )		{ return Plat
 #endif // defined( CINDER_MSW )
 
 //! Returns a DataSourceRef to the active App's's asset. Throws a AssetLoadExc on failure.
-inline DataSourceRef		loadAsset( const fs::path &relativePath )		{ return Platform::get()->loadAsset( relativePath ); }
+inline DataSourceRef		loadAsset( const fs::path &relativePath )				{ return Platform::get()->loadAsset( relativePath ); }
 //! Returns a fs::path to the active App's asset. Returns an empty path on failure.
-inline fs::path				getAssetPath( const fs::path &relativePath )	{ return Platform::get()->getAssetPath( relativePath ); }
+inline fs::path				getAssetPath( const fs::path &relativePath )			{ return Platform::get()->getAssetPath( relativePath ); }
 //! Adds an absolute path \a dirPath to the active App's list of directories which are searched for assets.
-inline void					addAssetDirectory( const fs::path &dirPath )	{ return Platform::get()->addAssetDirectory( dirPath ); }
+inline void					addAssetDirectory( const fs::path &dirPath )			{ return Platform::get()->addAssetDirectory( dirPath ); }
 //! Returns a vector of directories that are searched when looking up an asset path.
-inline const std::vector<fs::path>&	getAssetDirectories()					{ return Platform::get()->getAssetDirectories(); }
+inline const std::vector<fs::path>&	getAssetDirectories()							{ return Platform::get()->getAssetDirectories(); }
+//! Returns the absolute file path to the resources folder. Returns an empty fs::path on windows. \sa CinderResources
+inline fs::path				getResourceDirectory()									{ return Platform::get()->getResourceDirectory(); }
+//! Returns the absolute file path to a resource located at \a rsrcRelativePath inside the bundle's resources folder. Returns an empty fs::path on windows. Throws ResourceLoadExc on failure. \sa CinderResources
+inline fs::path				getResourcePath( const fs::path &rsrcRelativePath )		{ return Platform::get()->getResourcePath( rsrcRelativePath ); }
 
 //! Returns the path to the active App on disk
 inline fs::path		getAppPath() { return AppBase::get()->getAppPath(); }

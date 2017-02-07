@@ -23,12 +23,15 @@ lib/winrt/x64/cinder*.lib
 *.suo
 *.ncb
 *.sdf
+*.VC.opendb
+*.VC.db
 *.opensdf
 Debug/
 Release/
 Debug_ANGLE/
 Release_ANGLE/
 ipch/
+**/vc2013/enc_temp_folder/**
 
 # doxygen generated files
 docs/html
@@ -57,6 +60,9 @@ local.properties
 proguard-rules.pro
 .gradle/
 jniLibs/
+
+# cmake generated files
+cinderConfig.cmake
 
 # CinderBlocks
 blocks/

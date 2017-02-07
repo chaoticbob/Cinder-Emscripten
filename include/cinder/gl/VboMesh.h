@@ -83,9 +83,9 @@ class VboMesh {
 	static VboMeshRef	create( const geom::Source &source, const std::vector<VboMesh::Layout> &vertexArrayLayouts );
 	//! Creates a VboMesh which represents the geom::Source \a source using 1 or more Vbo/VboMesh::Layout pairs. A null VboRef requests allocation.
 	static VboMeshRef	create( const geom::Source &source, const std::vector<std::pair<VboMesh::Layout,VboRef>> &vertexArrayLayouts, const VboRef &indexVbo = nullptr );
-	//! Creates a VboMesh which represents the user's vertex buffer objects. Allows optional \a indexVbo to enable indexed vertices; creates a static VBO if none provided.
+	//! Creates a VboMesh which represents the user's vertex buffer objects. Allows optional \a indexVbo to enable indexed vertices; creates a static index VBO if none provided.
 	static VboMeshRef	create( uint32_t numVertices, GLenum glPrimitive, const std::vector<std::pair<geom::BufferLayout,VboRef>> &vertexArrayBuffers, uint32_t numIndices = 0, GLenum indexType = GL_UNSIGNED_SHORT, const VboRef &indexVbo = VboRef() );
-	//! Creates a VboMesh which represents the user's vertex buffer objects. Allows optional \a indexVbo to enable indexed vertices; creates a static VBO if none provided.
+	//! Creates a VboMesh which represents the user's vertex buffer objects. Allows optional \a indexVbo to enable indexed vertices; creates a static index VBO if none provided.
 	static VboMeshRef	create( uint32_t numVertices, GLenum glPrimitive, const std::vector<Layout> &vertexArrayLayouts, uint32_t numIndices = 0, GLenum indexType = GL_UNSIGNED_SHORT, const VboRef &indexVbo = VboRef() );
 
 	//! Maps a geom::Attrib to a named attribute in the GlslProg
@@ -110,6 +110,11 @@ class VboMesh {
 
 	//! Returns the VBO containing the indices of the mesh, or a NULL for non-indexed geometry
 	VboRef		getIndexVbo() { return mIndices; }
+
+	//! Updates internal vertex count to reflect an external change to underlying VBOs. Does NOT reallocate or modify storage.
+	void		updateNumVertices( uint32_t numVertices ) { mNumVertices = numVertices; }
+	//! Updates internal index count to reflect an external change to underlying VBOs. Does NOT reallocate or modify storage.
+	void		updateNumIndices( uint32_t numIndices ) { mNumIndices = numIndices; }
 
 	//! Builds and returns a vector of VboRefs for the vertex data of the mesh
 	std::vector<VboRef>									getVertexArrayVbos();
@@ -244,6 +249,10 @@ class VboMesh {
 #if defined( CINDER_GL_HAS_DRAW_INSTANCED )
 	//! Issues a glDraw*Instanced call, but without binding a VAO or sending shader vars. Consider gl::draw( VboMeshRef ) instead. Knows whether to call glDrawArrays or glDrawElements
 	void		drawInstancedImpl( GLsizei instanceCount );
+#endif
+#if defined( CINDER_GL_HAS_DRAW_INDIRECT )
+	//! Issues a glDraw*Indirect call, but without binding a VAO or sending shader vars. Knows whether to call glDrawArrays of glDrawElements
+	void		drawIndirectImpl( const GLvoid *indirect );
 #endif
 
 #if ! defined( CINDER_GL_ES )

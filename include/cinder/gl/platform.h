@@ -30,7 +30,11 @@
 #define CINDER_GL_ES_VERSION_3_1	310
 #define CINDER_GL_ES_VERSION_3_2	320
 
-#if defined( CINDER_GL_ANGLE ) || defined( CINDER_WINRT )
+#if ! defined( CINDER_GL_ANGLE ) && defined( CINDER_UWP )
+	#define CINDER_GL_ANGLE
+#endif
+
+#if defined( CINDER_GL_ANGLE )
 	#define GL_GLEXT_PROTOTYPES
 	#define CINDER_GL_ES
 	// the default for ANGLE is GL ES 3, but can be overridden with CINDER_GL_ES_2
@@ -134,15 +138,15 @@
 	#endif
 #else // iOS
 	#define CINDER_GL_ES
-	// the default for iOS is GL ES 2, but can be overridden with CINDER_GL_ES_3
-	#if defined( CINDER_GL_ES_3 )
+	// the default for iOS is GL ES 3, but can be overridden with CINDER_GL_ES_2
+	#if ! defined( CINDER_GL_ES_2 )
 		#include <OpenGLES/ES3/gl.h>
 		#include <OpenGLES/ES3/glext.h>
+		#define CINDER_GL_ES_3
  		#define CINDER_GL_ES_VERSION CINDER_GL_ES_VERSION_3
 	#else
 		#include <OpenGLES/ES2/gl.h>
 		#include <OpenGLES/ES2/glext.h>
-		#define CINDER_GL_ES_2
  		#define CINDER_GL_ES_VERSION CINDER_GL_ES_VERSION_2		
 	#endif
 #endif
@@ -156,7 +160,9 @@
 
 	// Android and Linux
 	#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
-		#define CINDER_GL_HAS_DRAW_INSTANCED
+		#if ! defined( CINDER_LINUX_EGL_RPI2 )
+		    #define CINDER_GL_HAS_DRAW_INSTANCED
+		#endif
 		#define CINDER_GL_HAS_TEXTURE_NORM16
 
 		// Requires: GL_ANDROID_extension_pack_es31a
@@ -178,12 +184,12 @@
 		#define CINDER_GL_HAS_REQUIRED_INTERNALFORMAT
 	#else 
 		// OpenGL ES 2
-		#define CINDER_GL_HAS_DRAW_INSTANCED
-		#if ! defined( CINDER_EMSCRIPTEN ) 
-			#define CINDER_GL_HAS_FBO_MULTISAMPLING
-			#define CINDER_GL_HAS_MAP_BUFFER
-			#define CINDER_GL_HAS_MAP_BUFFER_RANGE
+		#if ! defined( CINDER_LINUX_EGL_RPI2 )
+		    #define CINDER_GL_HAS_DRAW_INSTANCED
+		    #define CINDER_GL_HAS_FBO_MULTISAMPLING
+		    #define CINDER_GL_HAS_MAP_BUFFER_RANGE
 		#endif
+		#define CINDER_GL_HAS_MAP_BUFFER
 		#if defined( CINDER_ANDROID ) || defined( CINDER_LINUX ) || defined( CINDER_EMSCRIPTEN )
 			#define CINDER_GL_HAS_RENDER_SNORM
 			#define CINDER_GL_HAS_REQUIRED_INTERNALFORMAT
@@ -193,11 +199,14 @@
  	// Android, Linux
 	#if ( CINDER_GL_ES_VERSION >= CINDER_GL_ES_VERSION_3_1 )
  		#define CINDER_GL_HAS_COMPUTE_SHADER
+		#define CINDER_GL_HAS_DRAW_INDIRECT
  	#endif
 
 #else // OpenGL Desktop
 	#define CINDER_GL_HAS_UNIFORM_BLOCKS
 	#define CINDER_GL_HAS_DRAW_INSTANCED
+	#define CINDER_GL_HAS_MULTI_DRAW
+	#define CINDER_GL_HAS_DRAW_INDIRECT
 	#define CINDER_GL_HAS_FBO_MULTISAMPLING
 	#define CINDER_GL_HAS_TRANSFORM_FEEDBACK
 	#define CINDER_GL_HAS_WRAP_R
@@ -212,17 +221,15 @@
 	#define CINDER_GL_HAS_REQUIRED_INTERNALFORMAT
 
 	#define CINDER_GL_HAS_TEXTURE_NORM16
-
- 	#if defined( CINDER_LINUX )
- 		#define CINDER_GL_HAS_COMPUTE_SHADER
- 	#endif
-#endif
-
-#if defined( CINDER_MSW )
-	#if ! defined( CINDER_GL_ANGLE ) // MSW Desktop Only
+	
+	#if defined( CINDER_LINUX ) || defined( CINDER_MSW )
 		#define CINDER_GL_HAS_COMPUTE_SHADER
 		#define CINDER_GL_HAS_DEBUG_OUTPUT
+		#define CINDER_GL_HAS_MULTI_DRAW_INDIRECT
 	#endif
+#endif
+
+#if defined( CINDER_MSW_DESKTOP )
 	// both ANGLE and desktop have FBO Multisampling
 	#define CINDER_GL_HAS_FBO_MULTISAMPLING
 	// platform-specific synonyms
@@ -233,7 +240,7 @@
 		#define GL_DRAW_FRAMEBUFFER_BINDING			GL_DRAW_FRAMEBUFFER_BINDING_ANGLE
 		#define glRenderbufferStorageMultisample	glRenderbufferStorageMultisampleANGLE
 	#endif
-#endif // defined( CINDER_MSW )
+#endif // defined( CINDER_MSW_DESKTOP )
 
 #if defined( GL_EXT_debug_label )
 	#define CINDER_GL_HAS_DEBUG_LABEL 
@@ -242,9 +249,11 @@
 #if defined( CINDER_GL_ES )
 	#if defined( GL_KHR_debug ) && ( CINDER_GL_ES_VERSION <= CINDER_GL_ES_VERSION_3_1 )
 		#define CINDER_GL_HAS_KHR_DEBUG
-		#define GL_BUFFER 		GL_BUFFER_KHR
-		#define GL_SHADER 		GL_SHADER_KHR
-		#define GL_PROGRAM 		GL_PROGRAM_KHR
+		#if ! defined( CINDER_GL_ANGLE )
+			#define GL_BUFFER 		GL_BUFFER_KHR
+			#define GL_SHADER 		GL_SHADER_KHR
+			#define GL_PROGRAM 		GL_PROGRAM_KHR
+		#endif
 	#endif
 #else
 	#define CINDER_GL_HAS_KHR_DEBUG

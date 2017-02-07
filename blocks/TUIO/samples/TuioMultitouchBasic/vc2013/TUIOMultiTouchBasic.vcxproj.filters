@@ -13,144 +13,54 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
     <Filter Include="Blocks">
-      <UniqueIdentifier>{6634FB08-F309-40EC-A221-161360233E9F}</UniqueIdentifier>
+      <UniqueIdentifier>{BA88D529-66DE-4C86-8D12-EA13C3B7D835}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\OSC">
-      <UniqueIdentifier>{43BB9F34-B2AE-431F-9D25-2AE1D18B9242}</UniqueIdentifier>
+      <UniqueIdentifier>{614C3C9D-10A2-4FD7-A4A7-2554E6D3B33E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\OSC\src">
-      <UniqueIdentifier>{E5670CD6-5709-4F07-8BC7-72D5864E217C}</UniqueIdentifier>
+      <UniqueIdentifier>{284F2E59-66A3-4A04-885B-A03DB2033472}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Blocks\OSC\src\ip">
-      <UniqueIdentifier>{DBC90789-DFE3-401D-BBCA-77494BD1D8A7}</UniqueIdentifier>
+    <Filter Include="Blocks\OSC\src\cinder">
+      <UniqueIdentifier>{11A771FF-184D-4197-B41D-CA0716B55B73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Blocks\OSC\src\osc">
-      <UniqueIdentifier>{BEF8335E-0128-400A-A955-066ABCDF971E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Blocks\OSC\src\ip\win32">
-      <UniqueIdentifier>{12E3FECE-DE44-4928-8B09-6A9AC9956459}</UniqueIdentifier>
+    <Filter Include="Blocks\OSC\src\cinder\osc">
+      <UniqueIdentifier>{0D23F069-2C02-4CC9-96E9-DD60E0F048C7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\TUIO">
-      <UniqueIdentifier>{972E866F-EB75-4B9D-A646-601F699E23B4}</UniqueIdentifier>
+      <UniqueIdentifier>{B17863D9-119F-45F0-BB69-C0B437E39B85}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\TUIO\src">
-      <UniqueIdentifier>{DF219D27-2390-496D-B89F-D252C1DEA583}</UniqueIdentifier>
+      <UniqueIdentifier>{AFF34008-B623-4847-AFC5-2CD1B1C4CB54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Blocks\TUIO\include">
-      <UniqueIdentifier>{0A5CBEE5-2203-4E9A-A35C-A9AE8E64FD96}</UniqueIdentifier>
+    <Filter Include="Blocks\TUIO\src\cinder">
+      <UniqueIdentifier>{79728E07-14B8-4289-B9BC-7D67635EAB2B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\TUIO\src\cinder\tuio">
+      <UniqueIdentifier>{7FB37827-E7D0-4C55-940A-2E550CA8C70E}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\TUIOMultiTouchBasicApp.cpp">
+    <ClCompile Include="..\src\TuioMultiTouchBasicApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TUIOMultiTouchBasicApp.cpp">
+    <ClCompile Include="..\src\TuioMultiTouchBasicApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\..\..\osc\src\OscBundle.cpp">
-      <Filter>Blocks\OSC\src</Filter>
+    <ClCompile Include="..\..\..\..\OSC\src\cinder\osc\Osc.cpp">
+      <Filter>Blocks\OSC\src\cinder\osc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\OscListener.cpp">
-      <Filter>Blocks\OSC\src</Filter>
+    <ClInclude Include="..\..\..\..\OSC\src\cinder\osc\Osc.h">
+      <Filter>Blocks\OSC\src\cinder\osc</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\src\cinder\tuio\Tuio.cpp">
+      <Filter>Blocks\TUIO\src\cinder\tuio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\OscMessage.cpp">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\OscSender.cpp">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\ip\IpEndpointName.cpp">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\osc\OscOutboundPacketStream.cpp">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\osc\OscPrintReceivedElements.cpp">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\osc\OscReceivedElements.cpp">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\osc\OscTypes.cpp">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\..\..\osc\src\OscArg.h">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\OscBundle.h">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\OscListener.h">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\OscMessage.h">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\OscSender.h">
-      <Filter>Blocks\OSC\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\ip\IpEndpointName.h">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\ip\NetworkingUtils.h">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\ip\PacketListener.h">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\ip\TimerListener.h">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\ip\UdpSocket.h">
-      <Filter>Blocks\OSC\src\ip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\MessageMappingOscPacketListener.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscException.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscHostEndianness.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscOutboundPacketStream.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscPacketListener.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscPrintReceivedElements.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscReceivedElements.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\osc\src\osc\OscTypes.h">
-      <Filter>Blocks\OSC\src\osc</Filter>
-    </ClInclude>
-    <ClCompile Include="..\..\..\..\osc\src\ip\win32\NetworkingUtils.cpp">
-      <Filter>Blocks\OSC\src\ip\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\osc\src\ip\win32\UdpSocket.cpp">
-      <Filter>Blocks\OSC\src\ip\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\TuioClient.cpp">
-      <Filter>Blocks\TUIO\src</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\..\include\TuioClient.h">
-      <Filter>Blocks\TUIO\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\TuioCursor.h">
-      <Filter>Blocks\TUIO\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\TuioObject.h">
-      <Filter>Blocks\TUIO\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\TuioProfileBase.h">
-      <Filter>Blocks\TUIO\include</Filter>
+    <ClInclude Include="..\..\..\src\cinder\tuio\Tuio.h">
+      <Filter>Blocks\TUIO\src\cinder\tuio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -63,6 +63,18 @@ void drawElements( GLenum mode, GLsizei count, GLenum type, const GLvoid *indice
 	context()->drawElements( mode, count, type, indices );
 }
 
+#if defined( CINDER_GL_HAS_MULTI_DRAW )
+void multiDrawArrays( GLenum mode, GLint *first, GLsizei *count, GLsizei primcount )
+{
+	context()->multiDrawArrays( mode, first, count, primcount );
+}
+
+void multiDrawElements( GLenum mode, GLsizei *count, GLenum type, const GLvoid * const *indices, GLsizei primcount )
+{
+	context()->multiDrawElements( mode, count, type, indices, primcount );
+}
+#endif // defined( CINDER_GL_HAS_MULTI_DRAW )
+
 #if defined( CINDER_GL_HAS_DRAW_INSTANCED )
 void drawArraysInstanced( GLenum mode, GLint first, GLsizei count, GLsizei instanceCount )
 {
@@ -74,6 +86,30 @@ void drawElementsInstanced( GLenum mode, GLsizei count, GLenum type, const GLvoi
 	context()->drawElementsInstanced( mode, count, type, indices, instanceCount );
 }
 #endif // defined( CINDER_GL_HAS_DRAW_INSTANCED )
+
+#if defined( CINDER_GL_HAS_DRAW_INDIRECT )
+void drawArraysIndirect( GLenum mode, const GLvoid *indirect )
+{
+	context()->drawArraysIndirect( mode, indirect );
+}
+
+void drawElementsIndirect( GLenum mode, GLenum type, const GLvoid *indirect )
+{
+	context()->drawElementsIndirect( mode, type, indirect );
+}
+#endif // defined( CINDER_GL_HAS_DRAW_INDIRECT )
+
+#if defined( CINDER_GL_HAS_MULTI_DRAW_INDIRECT )
+void multiDrawArraysIndirect( GLenum mode, const GLvoid *indirect, GLsizei drawcount, GLsizei stride )
+{
+	context()->multiDrawArraysIndirect( mode, indirect, drawcount, stride );
+}
+
+void multiDrawElementsIndirect( GLenum mode, GLenum type, const GLvoid *indirect, GLsizei drawcount, GLsizei stride )
+{
+	context()->multiDrawElementsIndirect( mode, type, indirect, drawcount, stride );
+}
+#endif // defined( CINDER_GL_HAS_MULTI_DRAW_INDIRECT )
 
 namespace {
 
@@ -324,7 +360,7 @@ void draw( const Path2d &path, float approximationScale )
 void draw( const Shape2d &shape, float approximationScale )
 {
 	for( const auto &path : shape.getContours() )
-		gl::draw( path );
+		gl::draw( path, approximationScale );
 }
 
 void draw( const PolyLine2 &polyLine )
@@ -355,7 +391,7 @@ void draw( const PolyLine2 &polyLine )
 	ctx->popVao();
 }
 
-void draw( const PolyLine3 &polyLine )
+void draw( const std::vector<vec3> &points, bool isClosed )
 {
 	auto ctx = context();
 	const GlslProg* curGlslProg = ctx->getGlslProg();
@@ -364,7 +400,6 @@ void draw( const PolyLine3 &polyLine )
 		return;
 	}
 	
-	const vector<vec3> &points = polyLine.getPoints();
 	VboRef arrayVbo = ctx->getDefaultArrayVbo( sizeof(vec3) * points.size() );
 	arrayVbo->bufferSubData( 0, sizeof(vec3) * points.size(), points.data() );
 
@@ -379,7 +414,7 @@ void draw( const PolyLine3 &polyLine )
 
 	ctx->getDefaultVao()->replacementBindEnd();
 	ctx->setDefaultShaderVars();
-	ctx->drawArrays( ( polyLine.isClosed() ) ? GL_LINE_LOOP : GL_LINE_STRIP, 0, (GLsizei)points.size() );
+	ctx->drawArrays( ( isClosed ) ? GL_LINE_LOOP : GL_LINE_STRIP, 0, (GLsizei)points.size() );
 	ctx->popVao();
 }
 
@@ -538,13 +573,13 @@ class DefaultVboTarget : public geom::Target {
 		mReceivedAttribs.push_back( attr );
 	}
 
-	void copyIndices( geom::Primitive primitive, const uint32_t *sourceData, size_t numIndices, uint8_t requiredBytesPerIndex ) override
+	void copyIndices( geom::Primitive /*primitive*/, const uint32_t *sourceData, size_t numIndices, uint8_t requiredBytesPerIndex ) override
 	{
 		if( numIndices == 0 )
 			return;
 
 		mIndexType = GL_UNSIGNED_INT;
-		mElementVbo->bufferSubData( 0, numIndices * requiredBytesPerIndex, sourceData );
+		mElementVbo->bufferSubData( 0, numIndices * 4, sourceData );
 	}
 
 	const geom::Source*		mSource;
@@ -690,6 +725,9 @@ void drawEquirectangular( const gl::TextureCubeMapRef &texture, const Rectf &rec
 	glsl->uniform( "uCubeMapTex", 0 );
 	if( useLod )
 		glsl->uniform( "uLod", lod );
+
+	 gl::ScopedTextureBind scTex( texture );
+
 	drawSolidRect( rect, vec2( 0, 1 ), vec2( 1, 0 ) );
 }
 
@@ -869,12 +907,12 @@ void drawVerticalCross( const gl::TextureCubeMapRef &texture, const Rectf &rect,
 	drawCrossImpl( texture, positions, texCoords, lod );
 }
 
-void drawSolid( const Path2d &path, float approximationScale )
+void drawSolid( const Path2d &path, float /*approximationScale*/ )
 {
 	draw( Triangulator( path ).calcMesh() );
 }
 
-void drawSolid( const Shape2d &shape, float approximationScale )
+void drawSolid( const Shape2d &shape, float /*approximationScale*/ )
 {
 	draw( Triangulator( shape ).calcMesh() );
 }

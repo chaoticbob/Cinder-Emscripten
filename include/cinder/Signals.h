@@ -113,7 +113,7 @@ struct Disconnector : private Noncopyable {
 } // namespace detail
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Connection and ScopedConnection
+// Connection and ScopedConnection
 // ----------------------------------------------------------------------------------------------------
 
 //! Connection is returned from Signal::connect(), which can be used to disconnect the callback slot.
@@ -121,6 +121,8 @@ class Connection {
   public:
 	Connection();
 	Connection( const std::shared_ptr<detail::Disconnector> &disconnector, detail::SignalLinkBase *link, int priority );
+	Connection( Connection &&other );
+	Connection& operator=( Connection &&rhs );
 
 	//! Disconnects this Connection from the callback chain. \a return true if a disconnection was made, false otherwise.
 	bool disconnect();
@@ -145,12 +147,34 @@ class ScopedConnection : public Connection, private Noncopyable {
   public:
 	ScopedConnection();
 	~ScopedConnection();
-	ScopedConnection( const Connection &other );
 	ScopedConnection( ScopedConnection &&other );
 	ScopedConnection( Connection &&other );
-	ScopedConnection& operator=( const Connection &rhs );
 	ScopedConnection& operator=( ScopedConnection &&rhs );
 };
+
+// ----------------------------------------------------------------------------------------------------
+// ConnectionList
+// ----------------------------------------------------------------------------------------------------
+
+//! Maintains a list of Connections and calls disconnect on them when it is destroyed. Non-copyable.
+class ConnectionList : private Noncopyable {
+  public:
+	~ConnectionList();
+
+	//! Add a Connection to the list
+	void add( Connection &&target );
+	//! Disconnects and clears all Connections.
+	void clear();
+	//! Same as add()
+	void operator+=( Connection &&target ) { add( std::move( target ) ); }
+
+  private:
+	std::vector<Connection>	mConnections;
+};
+
+// ----------------------------------------------------------------------------------------------------
+// Collectors
+// ----------------------------------------------------------------------------------------------------
 
 namespace detail {
 
@@ -208,6 +232,10 @@ struct CollectorInvocation<Collector, void( Args... )> : public SignalBase {
 		return collector();
 	}
 };
+
+// ----------------------------------------------------------------------------------------------------
+// SignalProto
+// ----------------------------------------------------------------------------------------------------
 
 //! SignalProto template, the parent class of Signal, specialised for the callback signature and collector.
 template<class Collector, class R, class... Args>
@@ -411,7 +439,7 @@ class SignalProto<R ( Args... ), Collector> : private CollectorInvocation<Collec
 // namespace cinder
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Signal
+// Signal
 // ----------------------------------------------------------------------------------------------------
 
 //! \brief Signal is a template type providing an interface for arbitrary callback lists.
@@ -447,7 +475,7 @@ struct Signal : detail::SignalProto<Signature, Collector> {
 };
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - slot
+// slot
 // ----------------------------------------------------------------------------------------------------
 
 //! Creates a std::function by binding \a object to the member function pointer \a method.
@@ -465,7 +493,7 @@ std::function<R ( Args... )> slot( Class *object, R ( Class::*method )( Args... 
 }
 
 // ----------------------------------------------------------------------------------------------------
-// MARK: - Collectors
+// Collectors
 // ----------------------------------------------------------------------------------------------------
 
 //! Keep signal emissions going until any handler returns false.

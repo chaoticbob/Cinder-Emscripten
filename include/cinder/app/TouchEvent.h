@@ -37,9 +37,13 @@ class TouchEvent : public Event {
 	  public:
 		Touch() {}
 		Touch( const vec2 &pos, const vec2 &prevPos, uint32_t id, double time, void *native )
-			: mPos( pos ), mPrevPos( prevPos ), mId( id ), mTime( time ), mNative( native )
+			: mPos( pos ), mPrevPos( prevPos ), mId( id ), mTime( time ), mNative( native ), mHandled( false )
 		{}
-	
+
+		//! Returns whether this Touch has been marked as handled.
+		bool		isHandled() const { return mHandled; }
+		//! Marks the Touch as handled.
+		void		setHandled( bool handled = true ) { mHandled = handled; }
 		//! Returns the x position of the touch measured in points
 		float		getX() const { return mPos.x; }
 		//! Returns the y position of the touch measured in points
@@ -64,6 +68,7 @@ class TouchEvent : public Event {
 	  private:
 		vec2		mPos, mPrevPos;
 		uint32_t	mId;
+		bool        mHandled;
 		double		mTime;
 		void		*mNative;
 	};
@@ -71,18 +76,20 @@ class TouchEvent : public Event {
 	TouchEvent()
 		: Event()
 	{}
-	TouchEvent( const WindowRef &win, const std::vector<Touch> &touches )
-		: Event( win ), mTouches( touches )
+	TouchEvent( const WindowRef &win, const std::vector<Touch> &touches, void *native = nullptr )
+		: Event( win ), mTouches( touches ), mNative( native )
 	{}
 	
 	//! Returns a std::vector of Touch descriptors associated with this event
 	const std::vector<Touch>&	getTouches() const { return mTouches; }
 	//! Returns a std::vector of Touch descriptors associated with this event
 	std::vector<Touch>&			getTouches() { return mTouches; }
-
+	//! Returns a pointer to the OS-native object. This is a UIEvent* on Cocoa Touch, a NSEvent* on OSX, and a nullptr on MSW.
+	const void*	                getNative() const { return mNative; }
   private:
 	std::vector<Touch>		mTouches;
 	bool					mHandled;
+	void					*mNative;
 };
 
 inline std::ostream& operator<<( std::ostream &out, const TouchEvent::Touch &touch )

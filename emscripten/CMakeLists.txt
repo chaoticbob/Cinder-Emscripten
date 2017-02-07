@@ -130,18 +130,23 @@ list( APPEND CINDER_C_SRC_FILES
 	${CINDER_SRC_DIR}/oggvorbis/vorbis/vorbisfile.c
 	${CINDER_SRC_DIR}/oggvorbis/vorbis/window.c	
 
-	${CINDER_SRC_DIR}/zlib-1.2.3/adler32.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/compress.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/crc32.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/deflate.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/gzio.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/infback.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/inffast.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/inflate.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/inftrees.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/trees.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/uncompr.c
-	${CINDER_SRC_DIR}/zlib-1.2.3/zutil.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/adler32.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/compress.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/crc32.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/crc32.h
+	${CINDER_SRC_DIR}/zlib-1.2.8/deflate.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/gzclose.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/gzlib.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/gzread.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/gzwrite.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/infback.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/inffast.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/inflate.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/inftrees.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/trees.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/uncompr.c
+	${CINDER_SRC_DIR}/zlib-1.2.8/zconf.h
+	${CINDER_SRC_DIR}/zlib-1.2.8/zutil.c
 )
 
 list( APPEND CINDER_CXX_SRC_FILES
@@ -205,6 +210,7 @@ list( APPEND CINDER_CXX_SRC_FILES
 	${CINDER_SRC_DIR}/cinder/svg/Svg.cpp
 
 	${CINDER_SRC_DIR}/cinder/Area.cpp
+	${CINDER_SRC_DIR}/cinder/Base64.cpp
 	${CINDER_SRC_DIR}/cinder/BSpline.cpp
 	${CINDER_SRC_DIR}/cinder/BSplineFit.cpp
 	${CINDER_SRC_DIR}/cinder/Buffer.cpp
@@ -302,7 +308,7 @@ list(APPEND CINDER_INCLUDE_DIRS
 	${CINDER_SRC_DIR}/AntTweakBar
 	${CINDER_SRC_DIR}/oggvorbis/vorbis
 	${CINDER_SRC_DIR}/r8brain
-	${CINDER_SRC_DIR}/zlib-1.2.3
+	${CINDER_SRC_DIR}/zlib-1.2.8
 	${BOOST_INC_DIR}
 	${EMSCRIPTEN_ROOT_PATH}/system/lib/libcxxabi/include
 )

@@ -22,12 +22,19 @@
 */
 
 #include "cinder/app/linux/PlatformLinux.h"
+#include "cinder/app/App.h"
 #include "cinder/ImageSourceFileRadiance.h"
 #include "cinder/ImageSourceFileStbImage.h"
 #include "cinder/ImageTargetFileStbImage.h"
+#include "cinder/Utilities.h"
+#include "cinder/Log.h"
 
+#include "glfw/glfw3.h"
+
+#include <sys/types.h>
 #include <unistd.h>
 #include <limits.h>
+#include <pwd.h>
 
 namespace cinder {
 
@@ -118,47 +125,296 @@ fs::path PlatformLinux::getResourcePath( const fs::path &rsrcRelativePath ) cons
 	return fs::path(); // empty implies failure	
 }
 
+struct DialogHelper {
+	// Zenkity and KDialog for now...maybe more in the future.
+	enum ExecName { UNKNOWN, ZENITY, KDIALOG };
+
+	ExecName	execName = DialogHelper::UNKNOWN;
+	std::string	execPath;
+
+	bool isUnknown() const { return DialogHelper::UNKNOWN == execName; }
+	bool isZenity() const { return DialogHelper::ZENITY == execName; }
+	bool isKDialog() const { return DialogHelper::KDIALOG == execName; }
+
+	static DialogHelper get() {
+		DialogHelper result;
+
+		// Zenity gets priority
+		if( fs::exists( "/usr/bin/zenity" ) ) {
+			result.execName = DialogHelper::ZENITY;
+			result.execPath = "/usr/bin/zenity";
+		}
+		else if( fs::exists( "/usr/bin/kdialog" ) ) {
+			result.execName = DialogHelper::KDIALOG;
+			result.execPath = "/usr/bin/kdialog";
+		}
+
+		return result;
+	}
+
+	static fs::path execCmd( const std::vector<std::string>& args ) {
+		fs::path result;
+
+		std::stringstream ss;
+		for( size_t i = 0; i < args.size(); ++i ) {
+			ss << args[i];
+			if( i < ( args.size() - 1 ) ) {
+				ss << " ";
+			}
+		}
+		
+		std::string cmd = ss.str();
+		if( ! cmd.empty() ) {
+			FILE* pipe = popen( cmd.c_str(), "r" );
+			if( pipe ) {
+				std::vector<char> buffer( 512 );
+				std::string value;
+				while( ! feof( pipe ) ) {
+					std::memset( static_cast<void*>( buffer.data() ), 0, buffer.size() );
+					if( nullptr != fgets( buffer.data(), buffer.size(), pipe ) )  {
+						value += static_cast<const char *>( buffer.data() );
+					}
+				}
+				if( ! value.empty() ) {
+					// Zenity seems to add a new line character at the end of the path, so remove it if present.
+					const auto newLineCharacterPos = std::strcspn( value.c_str(), "\n" );
+
+					if( newLineCharacterPos !=  value.size() ) {
+						value[ newLineCharacterPos ] = 0;
+					}
+
+					result = value;
+				}
+			}
+			pclose(pipe);			
+		}
+
+		return result;
+	}
+
+	static std::string quote( const std::string& s ) {
+		return "\"" + s + "\"";
+	}
+
+	static fs::path getOpenFilePath( const fs::path &initialPath, const std::vector<std::string> &extensions ) {
+		fs::path result;
+		auto dh = DialogHelper::get();
+		if( ! dh.isUnknown() ) {
+			std::vector<std::string> args;
+
+			args.push_back( dh.execPath );
+			if( dh.isZenity() ) {
+				args.push_back( "--file-selection" );
+
+				args.push_back( "--filename");
+				args.push_back( quote( initialPath.string() ) );
+
+				if( ! extensions.empty() ) {
+					args.push_back( "--file-filter" );
+					std::string allExts;
+					for( size_t i = 0; i < extensions.size(); ++i ) {
+						allExts += ( "*." + extensions[i] );
+						if( i < ( extensions.size() - 1 ) ) {
+							allExts += " ";
+						}
+					}
+					args.push_back( quote( allExts ) );
+				}
+			}
+			else if( dh.isKDialog() ) {
+				args.push_back( "--getopenfilename" );
+				// KDialog requires a starting dir
+				args.push_back( quote( initialPath.string() ) );
+
+				if( ! extensions.empty() ) {
+					std::string allExts;
+					for( size_t i = 0; i < extensions.size(); ++i ) {
+						allExts += ( "*." + extensions[i] );
+						if( i < ( extensions.size() - 1 ) ) {
+							allExts += " ";
+						}
+					}
+					args.push_back( quote( allExts ) );
+				}
+			}
+
+			result = DialogHelper::execCmd( args );
+		}
+		return result;
+	}
+
+	static fs::path getFolderPath( const fs::path &initialPath ) {
+		fs::path result;
+		auto dh = DialogHelper::get();
+		if( ! dh.isUnknown() ) {
+			std::vector<std::string> args;
+
+			args.push_back( dh.execPath );
+			if( dh.isZenity() ) {
+				args.push_back( "--file-selection" );
+
+				args.push_back( "--directory" );
+
+				args.push_back( "--filename");
+				args.push_back( quote( initialPath.string() ) );
+			}
+			else if( dh.isKDialog() ) {
+				args.push_back( "--getexistingdirectory" );
+				// KDialog requires a starting dir
+				args.push_back( quote( initialPath.string() ) );
+			}
+
+			result = DialogHelper::execCmd( args );
+		}
+		return result;
+	}
+
+	static fs::path getSaveFilePath( const fs::path &initialPath, const std::vector<std::string> &extensions ) {
+		fs::path result;
+		auto dh = DialogHelper::get();
+		if( ! dh.isUnknown() ) {
+			std::vector<std::string> args;
+
+			args.push_back( dh.execPath );
+			if( dh.isZenity() ) {
+				args.push_back( "--file-selection" );
+				args.push_back( "--save" );
+				args.push_back( "--confirm-overwrite" );
+
+				args.push_back( "--filename");
+				args.push_back( quote( initialPath.string() ) );
+
+				if( ! extensions.empty() ) {
+					std::string allExts;
+					for( size_t i = 0; i < extensions.size(); ++i ) {
+						allExts += ( "*." + extensions[i] );
+						if( i < ( extensions.size() - 1 ) ) {
+							allExts += " ";
+						}
+					}
+					args.push_back( quote( allExts ) );
+				}
+			}
+			else if( dh.isKDialog() ) {
+				args.push_back( "--getsavefilename" );
+				// KDialog requires a starting dir
+				args.push_back( quote( initialPath.string() ) );
+
+				if( ! extensions.empty() ) {
+					args.push_back( "--file-filter" );
+					std::string allExts;
+					for( size_t i = 0; i < extensions.size(); ++i ) {
+						allExts += ( "*." + extensions[i] );
+						if( i < ( extensions.size() - 1 ) ) {
+							allExts += " ";
+						}
+					}
+					args.push_back( quote( allExts ) );
+				}
+			}
+
+			result = DialogHelper::execCmd( args );
+		}
+		return result;
+	}
+};
+
 
 fs::path PlatformLinux::getOpenFilePath( const fs::path &initialPath, const std::vector<std::string> &extensions ) 
 {
-	// @TODO: Implement
-	return fs::path();
+	return DialogHelper::getOpenFilePath( initialPath, extensions );
 }
 
 fs::path PlatformLinux::getFolderPath( const fs::path &initialPath ) 
 {
-	// @TODO: Implement
-	return fs::path();
+	return DialogHelper::getFolderPath( initialPath );
 }
 
 fs::path PlatformLinux::getSaveFilePath( const fs::path &initialPath, const std::vector<std::string> &extensions ) 
 {
-	// @TODO: Implement
-	return fs::path();
+	return DialogHelper::getSaveFilePath( initialPath, extensions );
 }
 
 std::map<std::string, std::string> PlatformLinux::getEnvironmentVariables() 
 {
-	// @TODO: Implement
-	return std::map<std::string, std::string>();
+	std::map<std::string, std::string> result;
+
+	char **envVars = environ;
+	while( nullptr != *envVars ) {
+		std::string var = std::string( *envVars );
+		std::vector<std::string> kv = ci::split( var, '=' );
+		if( 2 == kv.size() ) {
+			result[kv[0]] = kv[1];
+		}
+		++envVars;
+	}
+
+	return result;
 }
 
 fs::path PlatformLinux::expandPath( const fs::path &path ) 
 {
-	// @TODO: Implement
-	return fs::path();	
+	fs::path filename = path.filename();
+
+	char actualPath[PATH_MAX];
+	if( ::realpath( path.parent_path().c_str(), actualPath ) ) { 
+		fs::path expandedPath = fs::path( std::string( actualPath ) );
+		expandedPath /= filename;
+		return expandedPath;	
+	}   
+
+	return fs::path();  
 }
 
 fs::path PlatformLinux::getHomeDirectory() const 
 {
-	// @TODO: Implement
-	return fs::path();	
+	fs::path result;
+
+	const char *homeDir = getenv( "HOME" );
+	if( nullptr == homeDir ) {
+		long int len = sysconf( _SC_GETPW_R_SIZE_MAX );
+		if( -1 == len ) {
+			len = 1024;
+		}
+		std::vector<char> buf( len );
+
+		struct passwd pwd = {};
+		struct passwd *pwdPtr = nullptr;
+		int error = 0;
+
+		while( ERANGE == ( error = getpwuid_r( getuid(), &pwd, buf.data(), buf.size(), &pwdPtr ) ) ) {
+			buf.resize( 2*buf.size() );
+			// Bail if the size becomes too big
+			if( buf.size() >= 65536 ) {
+				error = ERANGE;
+				break;
+			}
+		}
+
+		if( 0 == error ) {
+			result = fs::path( pwd.pw_dir );
+		}
+	}
+	else {
+		result = fs::path( homeDir );
+	}
+
+	return result;
 }
 
 fs::path PlatformLinux::getDocumentsDirectory() const 
 {
-	// @TODO: Implement
-	return fs::path();	
+	fs::path result;
+
+	auto homeDir = getHomeDirectory();
+	if( ! homeDir.empty() ) {
+		auto docsDir = homeDir / "Documents";
+		if( fs::exists( docsDir ) && fs::is_directory( docsDir ) ) {
+			result = docsDir;
+		}
+	}
+
+	return result;
 }
 
 fs::path PlatformLinux::getDefaultExecutablePath() const 
@@ -169,17 +425,32 @@ fs::path PlatformLinux::getDefaultExecutablePath() const
     if( ( -1 != len ) && ( len < buf.size() ) ) {
       buf[len] = '\0';
     }
- 	return fs::path( std::string( &(buf[0]), len ) );
+ 	return fs::path( std::string( &(buf[0]), len ) ).parent_path();
 }
 
 void PlatformLinux::sleep( float milliseconds ) 
 {
-	// @TODO: Implement
+	unsigned long sleepMicroSecs = milliseconds*1000L;
+	usleep( sleepMicroSecs );	
 }
 
 void PlatformLinux::launchWebBrowser( const Url &url ) 
 {
-	// @TODO: Implement
+	pid_t pid = fork();
+
+	if( 0 == pid ) {
+		// 0 means we're in the child preocess
+
+		const std::string exe = "/usr/bin/xdg-open";
+		std::vector<char*> args;
+		args.push_back( const_cast<char*>( exe.c_str() ) );
+		args.push_back( const_cast<char*>( url.c_str() ) );
+		args.push_back( nullptr );
+
+		execvp( args[0], args.data() );
+
+		_exit( 1 );
+	}
 }
 
 std::vector<std::string> PlatformLinux::stackTrace() 
@@ -188,14 +459,115 @@ std::vector<std::string> PlatformLinux::stackTrace()
 	return std::vector<std::string>();	
 }
 
-const std::vector<DisplayRef>& PlatformLinux::getDisplays()
+void PlatformLinux::addDisplay( const DisplayRef &display )
 {
-	if( ! mDisplaysInitialized ) {
-		// @TODO: Implement fuller
+	mDisplays.push_back( display );
 
-		mDisplaysInitialized = true;
+	if( app::AppBase::get() )
+		app::AppBase::get()->emitDisplayConnected( display );
+}
+
+void PlatformLinux::removeDisplay( const DisplayRef &display )
+{
+	DisplayRef displayCopy = display;
+	mDisplays.erase( std::remove( mDisplays.begin(), mDisplays.end(), displayCopy ), mDisplays.end() );
+				
+	if( app::AppBase::get() )
+		app::AppBase::get()->emitDisplayDisconnected( displayCopy );
+}
+
+std::string DisplayLinux::getName() const
+{
+	return glfwGetMonitorName( mMonitor );
+}
+
+GLFWmonitor* DisplayLinux::getGlfwMonitor() const
+{
+	return mMonitor;
+}
+
+DisplayRef PlatformLinux::findDisplayFromGlfwMonitor( GLFWmonitor *monitor )
+{
+	for( auto &display : mDisplays ) {
+		const auto displayLinux ( dynamic_cast<const DisplayLinux*>( display.get() ) );
+		if( displayLinux->getGlfwMonitor() == monitor )
+			return display;
 	}
 
+	return DisplayRef();
+}
+
+void DisplayLinux::displayReconfiguredCallback( GLFWmonitor* monitor, int event )
+{
+	auto platform = app::PlatformLinux::get();
+	if( event == GLFW_DISCONNECTED ) {
+		auto display = platform->findDisplayFromGlfwMonitor( monitor );
+		if( display )
+			platform->removeDisplay( display ); // this will signal
+		else
+			CI_LOG_W( "Received removed from displayReconfiguredCallback() on unknown display" );		
+	}
+	else if( event == GLFW_CONNECTED ) {
+		auto display = platform->findDisplayFromGlfwMonitor( monitor );
+		if( ! display ) {
+			auto newDisplay = std::make_shared<DisplayLinux>();
+
+			const auto *videoMode = glfwGetVideoMode( monitor  );
+			auto size = ivec2( videoMode->width, videoMode->height );
+			ivec2 pos;
+			glfwGetMonitorPos(monitor, &pos.x, &pos.y);
+
+			newDisplay->mArea = Area( pos.x, pos.y, 
+				pos.x + size.x, pos.y + size.y );
+
+			newDisplay->mBitsPerPixel = videoMode->redBits + videoMode->greenBits + videoMode->blueBits;
+
+			// TODO: figure out content scaling.
+			//const double dpi = mode->width / (widthMM / 25.4);
+			newDisplay->mContentScale = 1.0;
+			platform->addDisplay( DisplayRef( newDisplay ) ); // this will signal
+		}
+		else
+			CI_LOG_W( "Received add from displayReconfiguredCallback() for already known display" );				
+	}
+}
+
+const std::vector<DisplayRef>& app::PlatformLinux::getDisplays()
+{
+	auto glfwInitialized = ::glfwInit();
+	if( ! mDisplaysInitialized && glfwInitialized ) {
+		// this is our first call; register a callback with CoreGraphics for any 
+		// display changes. Note that this only works with a run loop
+		::glfwSetMonitorCallback( DisplayLinux::displayReconfiguredCallback );
+		int32_t numMonitors, nonPrimaryIndex = 1;
+		GLFWmonitor **monitors = ::glfwGetMonitors( &numMonitors );
+		GLFWmonitor *mainScreen = ::glfwGetPrimaryMonitor();
+		mDisplays.resize( numMonitors );
+		for( size_t i = 0; i < numMonitors; ++i ) {
+			GLFWmonitor *monitor = monitors[i];
+			auto newDisplay = std::make_shared<DisplayLinux>();
+			
+			const auto *videoMode = ::glfwGetVideoMode( monitor );
+			auto size = ivec2( videoMode->width, videoMode->height );
+			ivec2 pos;
+			::glfwGetMonitorPos(monitor, &pos.x, &pos.y);
+
+			newDisplay->mArea = Area( pos.x, pos.y, pos.x + size.x, pos.y + size.y );
+			newDisplay->mBitsPerPixel = videoMode->redBits + videoMode->greenBits + videoMode->blueBits;
+
+			// TODO: figure out content scaling.
+			//const double dpi = mode->width / (widthMM / 25.4);
+			newDisplay->mContentScale = 1.0f;
+			newDisplay->mMonitor = monitor;
+			if( mainScreen == monitor )
+				mDisplays[0] = std::move( newDisplay );
+			else
+				mDisplays[nonPrimaryIndex++] = std::move( newDisplay );
+		}
+
+		mDisplaysInitialized = true;	
+	}
+	
 	return mDisplays;
 }
 

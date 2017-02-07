@@ -33,6 +33,7 @@ WindowImplLinux::WindowImplLinux( const Window::Format &format, RendererRef shar
 	mDisplay = format.getDisplay();
 	mRenderer = format.getRenderer();
 
+	const auto& options = std::dynamic_pointer_cast<RendererGl>( mRenderer )->getOptions();
 #if defined( CINDER_GL_ES )
 	::glfwDefaultWindowHints();
 	::glfwWindowHint( GLFW_CLIENT_API, GLFW_OPENGL_ES_API );
@@ -55,7 +56,6 @@ WindowImplLinux::WindowImplLinux( const Window::Format &format, RendererRef shar
   #endif
 
 #else // Desktop
-	const auto& options = std::dynamic_pointer_cast<RendererGl>( mRenderer )->getOptions();
 	int32_t majorVersion = options.getVersion().first;
 	int32_t minorVersion = options.getVersion().second;
 	::glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, majorVersion );
@@ -67,7 +67,11 @@ WindowImplLinux::WindowImplLinux( const Window::Format &format, RendererRef shar
 	else {
 		std::cout << "Rendering with OpenGL " << majorVersion << "." << minorVersion << std::endl;		
 	}
+	if( options.getDebug() )
+		::glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 #endif
+
+    ::glfwWindowHint( GLFW_SAMPLES, options.getMsaa() );
 
 	auto windowSize = format.getSize();
 	mGlfwWindow = ::glfwCreateWindow( windowSize.x, windowSize.y, format.getTitle().c_str(), NULL, NULL );
@@ -120,6 +124,7 @@ void WindowImplLinux::close()
 
 void WindowImplLinux::setTitle( const std::string &title )
 {
+    ::glfwSetWindowTitle( mGlfwWindow, title.c_str() );
 }
 
 void WindowImplLinux::hide()

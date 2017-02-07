@@ -25,10 +25,10 @@ set( ASSETS_DIR "../../../assets@/" )
 set( EXE_NAME ${PROJECT_NAME} )
 
 set( SRC_FILES
-	${SRC_DIR}/TrianglePiece.cpp
+	${SRC_DIR}/InstagramStream.cpp
 	${SRC_DIR}/InstascopeApp.cpp
 	${SRC_DIR}/TextRibbon.cpp
-	${SRC_DIR}/InstagramStream.cpp
+	${SRC_DIR}/TrianglePiece.cpp
 )
 
 set( CMAKE_EXECUTABLE_SUFFIX ".html" )
@@ -47,6 +47,6 @@ target_include_directories(
 target_link_libraries( 
 	"${EXE_NAME}" 
 	${CINDER_LIB_DIR}/emscripten/${CINDER_GL_ES_PLATFORM}/libcinder${CINDER_LIB_SUFFIX}.bc
-	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.a
-	${CINDER_LIB_DIR}/emscripten/libboost_system.a
+	${CINDER_LIB_DIR}/emscripten/libboost_filesystem.bc
+	${CINDER_LIB_DIR}/emscripten/libboost_system.bc
 )

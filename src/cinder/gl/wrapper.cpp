@@ -31,6 +31,10 @@
 	#include "glload/wgl_all.h"
 #elif defined( CINDER_MAC )
 	#include <OpenGL/OpenGL.h>
+#elif defined( CINDER_LINUX )
+	#if ! defined( CINDER_LINUX_EGL_ONLY )
+		#include "glfw/glfw3.h"
+	#endif
 #endif
 
 using namespace std;
@@ -51,6 +55,11 @@ void enableVerticalSync( bool enable )
 	GLint sync = ( enable ) ? 1 : 0;
 	if( wglext_EXT_swap_control )
 		::wglSwapIntervalEXT( sync );
+#elif defined( CINDER_LINUX )
+	#if ! defined( CINDER_LINUX_EGL_ONLY )
+		GLint sync = ( enable ) ? 1 : 0;
+		glfwSwapInterval( sync );
+	#endif
 #endif
 }
 
@@ -157,11 +166,24 @@ std::pair<GLint,GLint> getVersion()
 #endif
 }
 
+std::string getString( GLenum name )
+{
+	const GLubyte* s = glGetString( name );
+	
+	if( s )
+		return std::string( reinterpret_cast<const char*>( s ) );
+	else
+		return std::string();
+}
+
 std::string getVersionString()
 {
-	const GLubyte* s = glGetString( GL_VERSION );
+	return getString( GL_VERSION );
+}
 
-	return std::string( reinterpret_cast<const char*>( s ) );
+std::string getVendorString()
+{
+	return getString( GL_VENDOR );
 }
 
 GlslProgRef& getStockShader( const class ShaderDef &shader )
